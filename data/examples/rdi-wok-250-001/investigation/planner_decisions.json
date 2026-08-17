@@ -1,0 +1,134 @@
+[
+  {
+    "timestamp_utc": "2026-08-16T21:37:47.747913+00:00",
+    "candidate_count": 1,
+    "admissible_count": 1,
+    "mode": "DETERMINISTIC_SINGLETON",
+    "selected_action_id": "INT-FU-001",
+    "selected_capability": "spp.analyze_precedent_study",
+    "confidence": null,
+    "reason": null,
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-16T21:37:53.621384+00:00",
+    "candidate_count": 3,
+    "admissible_count": 3,
+    "mode": "FOUNDRY_LLM",
+    "selected_action_id": "INT-FU-004",
+    "selected_capability": "transmission.assess_gen_tie_context",
+    "confidence": "HIGH",
+    "reason": null,
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-16T21:37:57.002736+00:00",
+    "candidate_count": 2,
+    "admissible_count": 2,
+    "mode": "FOUNDRY_LLM",
+    "selected_action_id": "INT-FU-003",
+    "selected_capability": "spp.evaluate_additional_poi",
+    "confidence": "HIGH",
+    "reason": "The current evidence shows only two candidate POIs have been screened, which is an explicit remaining uncertainty and a broader screening gap. Before placing more weight on a Tatonga-versus-Woodward comparison, the best next information gain is to expand the POI set and test whether another plausible 345-kV POI is stronger or comparable. That makes INT-FU-003 the most informative next step among the admissible options.",
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-17T03:49:31.000876+00:00",
+    "candidate_count": 9,
+    "admissible_count": 7,
+    "mode": "FOUNDRY_LLM",
+    "selected_action_id": "INV-006",
+    "selected_capability": "land.resolve_status",
+    "confidence": "HIGH",
+    "reason": null,
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-17T03:57:55.526314+00:00",
+    "candidate_count": 8,
+    "admissible_count": 6,
+    "mode": "FOUNDRY_LLM",
+    "selected_action_id": "INV-005",
+    "selected_capability": "environment.screen_species",
+    "confidence": "MEDIUM",
+    "reason": null,
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-17T04:03:58.385075+00:00",
+    "candidate_count": 7,
+    "admissible_count": 5,
+    "mode": "FOUNDRY_LLM",
+    "selected_action_id": "INV-003",
+    "selected_capability": "gis.analyze_terrain",
+    "confidence": "HIGH",
+    "reason": null,
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-17T04:08:21.529232+00:00",
+    "candidate_count": 6,
+    "admissible_count": 4,
+    "mode": "FOUNDRY_LLM",
+    "selected_action_id": "INV-004",
+    "selected_capability": "gis.analyze_land_cover",
+    "confidence": "MEDIUM",
+    "reason": null,
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-17T04:11:15.233782+00:00",
+    "candidate_count": 5,
+    "admissible_count": 3,
+    "mode": "FOUNDRY_LLM",
+    "selected_action_id": "INV-008",
+    "selected_capability": "regulatory.build_permit_matrix",
+    "confidence": "MEDIUM",
+    "reason": null,
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-17T09:36:09.511097+00:00",
+    "candidate_count": 4,
+    "admissible_count": 2,
+    "mode": "FOUNDRY_LLM",
+    "selected_action_id": "INV-007",
+    "selected_capability": "aviation.screen_candidate",
+    "confidence": "MEDIUM",
+    "reason": null,
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-17T10:04:37.456516+00:00",
+    "candidate_count": 3,
+    "admissible_count": 1,
+    "mode": "DETERMINISTIC_SINGLETON",
+    "selected_action_id": "INV-002",
+    "selected_capability": "wind.analyze_candidate_resource",
+    "confidence": null,
+    "reason": null,
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-17T10:06:32.805123+00:00",
+    "candidate_count": 2,
+    "admissible_count": 2,
+    "mode": "FOUNDRY_LLM",
+    "selected_action_id": "INV-010",
+    "selected_capability": "gis.resolve_flood_evidence",
+    "confidence": "MEDIUM",
+    "reason": null,
+    "validated_allowed": true
+  },
+  {
+    "timestamp_utc": "2026-08-17T10:07:50.722063+00:00",
+    "candidate_count": 1,
+    "admissible_count": 1,
+    "mode": "DETERMINISTIC_SINGLETON",
+    "selected_action_id": "INV-009",
+    "selected_capability": "environment.screen_cultural_resources",
+    "confidence": null,
+    "reason": null,
+    "validated_allowed": true
+  }
+]

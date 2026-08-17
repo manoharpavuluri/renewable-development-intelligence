@@ -1,4 +1,4 @@
-.PHONY: demo test smoke trace synthesize stability mlflow-ui help
+.PHONY: demo app test smoke trace synthesize stability mlflow-ui export-example help
 
 VENV := .venv/bin
 export PYTHONPATH := src
@@ -10,13 +10,15 @@ RESULT_DIR ?= data/examples/rdi-wok-250-001
 RDI_THREAD_ID ?= RDI-WOK-250-001:screening:v1
 
 help:
-	@echo "make demo        - show the completed screening + draft recommendation (frozen example, no re-run)"
-	@echo "make test        - run the offline evaluation harness"
-	@echo "make smoke       - live-network check of every external evidence source"
-	@echo "make synthesize  - re-run gate synthesis / G6 / G7 / recommendation draft (calls Foundry)"
-	@echo "make trace       - log one full pipeline trace to MLflow (calls Foundry)"
-	@echo "make stability   - recommendation-stability eval, N live Foundry runs (default 20)"
-	@echo "make mlflow-ui   - open the MLflow trace viewer"
+	@echo "make demo          - show the completed screening + draft recommendation (frozen example, no re-run)"
+	@echo "make app           - launch the Streamlit executive dashboard (frozen example, no credentials)"
+	@echo "make test          - run the offline evaluation harness"
+	@echo "make smoke         - live-network check of every external evidence source"
+	@echo "make synthesize    - re-run gate synthesis / G6 / G7 / recommendation draft (calls Foundry)"
+	@echo "make trace         - log one full pipeline trace to MLflow (calls Foundry)"
+	@echo "make stability     - recommendation-stability eval, N live Foundry runs (default 20)"
+	@echo "make mlflow-ui     - open the MLflow trace viewer"
+	@echo "make export-example - regenerate the frozen data/examples/ snapshot from the live checkpoint"
 
 demo:
 	@echo "=== RDI-WOK-250-001: western Oklahoma 250 MW wind screening ==="
@@ -40,6 +42,12 @@ print('Gates:'); \
 	@$(VENV)/python -m pytest tests/ -q 2>&1 | tail -3
 	@echo
 	@echo "Full docs: README.md | docs/architecture/overview.md | docs/reports/executive_assessment.md"
+
+app:
+	$(VENV)/streamlit run streamlit_app.py
+
+export-example:
+	RESULT_DIR=$(RESULT_DIR) RDI_THREAD_ID=$(RDI_THREAD_ID) $(VENV)/python scripts/export_frozen_example.py
 
 test:
 	$(VENV)/python -m pytest tests/ -v

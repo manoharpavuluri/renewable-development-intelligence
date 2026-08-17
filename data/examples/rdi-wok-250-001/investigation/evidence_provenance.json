@@ -1,0 +1,99 @@
+[
+  {
+    "domain": "interconnection",
+    "gate_id": "G2",
+    "authority": "Southwest Power Pool",
+    "dataset": "HCT/Pre-Screening grid-data (multiple POIs x model cases) + HIFLD transmission lines",
+    "evidence_quality": "HIGH",
+    "artifact_count": 5,
+    "sha256": null,
+    "artifact_hashes": [
+      "ebf5c45f17f6deac97e891d34523357579ccd1ef0c1b7ebe18974951ac318887",
+      "ed21d7e7e3b642e8f99da4a2b2a1d13ba2ec27540480701f6d401ca1ecb022ea",
+      "ebf5c45f17f6deac97e891d34523357579ccd1ef0c1b7ebe18974951ac318887",
+      "ed21d7e7e3b642e8f99da4a2b2a1d13ba2ec27540480701f6d401ca1ecb022ea",
+      "fde2821ae1915b8155db464621a3636a83d7237c3b4e7f7900d34d883214c631"
+    ]
+  },
+  {
+    "domain": "wind_resource",
+    "gate_id": "G1",
+    "authority": null,
+    "dataset": "HRRR MET Toolkit",
+    "evidence_quality": "LOW",
+    "artifact_count": 1,
+    "sha256": "54fc8c66f23031f7452d581521b0165a00dcd00a1d4e29ab82427d8f45dae22d"
+  },
+  {
+    "domain": "terrain",
+    "gate_id": "G1",
+    "authority": "U.S. Geological Survey",
+    "dataset": "3D Elevation Program (3DEP) Bare Earth DEM",
+    "evidence_quality": "MEDIUM",
+    "artifact_count": 1,
+    "sha256": "81ba8e033276cbbd51f00a4c719b740fc97fec014920b2d873c91bcdfd8e44c0"
+  },
+  {
+    "domain": "land_cover",
+    "gate_id": "G1",
+    "authority": "U.S. Geological Survey / Multi-Resolution Land Characteristics (MRLC) Consortium",
+    "dataset": "National Land Cover Database (NLCD), Annual",
+    "evidence_quality": "MEDIUM",
+    "artifact_count": 1,
+    "sha256": "d4a92088025aacab5d127b4cb806c08036e5e13eb8b446251f8216a40110bf93"
+  },
+  {
+    "domain": "species",
+    "gate_id": "G3",
+    "authority": "U.S. Fish and Wildlife Service",
+    "dataset": "USFWS Critical Habitat (Final + Proposed)",
+    "evidence_quality": "MEDIUM",
+    "artifact_count": 1,
+    "sha256": "8113a55f2b97bedd1a7add9bbf3f5acd38ed42910ba4f412d5b42e13c7100ade"
+  },
+  {
+    "domain": "land_status",
+    "gate_id": "G3",
+    "authority": "U.S. Geological Survey",
+    "dataset": "Protected Areas Database of the United States",
+    "evidence_quality": "MEDIUM",
+    "artifact_count": 1,
+    "sha256": "381146821c9a97b6dd829d91b075a5d60819356ed955e7ff9a543f3da82a4508"
+  },
+  {
+    "domain": "regulatory",
+    "gate_id": "G4",
+    "authority": null,
+    "dataset": null,
+    "evidence_quality": "LOW",
+    "artifact_count": 1,
+    "sha256": "8dc3de0160b759de88d8191e6bc630d4b10ad337148ff2714ba7ee17c28e914d"
+  },
+  {
+    "domain": "aviation",
+    "gate_id": "G5",
+    "authority": "Federal Aviation Administration",
+    "dataset": null,
+    "evidence_quality": "MEDIUM",
+    "artifact_count": 1,
+    "sha256": "15b7eb63d23b22aa674957ffeedc4971419e464986fcaf7b03e4201f6650242d"
+  },
+  {
+    "domain": "flood",
+    "gate_id": "G3",
+    "authority": "Federal Emergency Management Agency",
+    "dataset": "National Flood Hazard Layer",
+    "evidence_quality": "LOW",
+    "artifact_count": 1,
+    "sha256": "5ee1d395c4981fce68852e349205b10a392cb7dbeb5d98d07cc863726b27c663"
+  },
+  {
+    "domain": "cultural",
+    "gate_id": "G3",
+    "authority": "National Park Service",
+    "dataset": "National Register of Historic Places (NRHP)",
+    "evidence_quality": "MEDIUM",
+    "artifact_count": 1,
+    "sha256": "f8a094f8670e23a038dffdc64217aa761d05b488c53775a52706ddbb4f7b87c0"
+  }
+]

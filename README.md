@@ -94,7 +94,7 @@ recommendation drafting).
 
 ## Authoritative evidence sources
 
-All real, all live-checked (`scripts/smoke_live_sources.py`, 10/10 UP as of
+All real, all live-checked (`scripts/smoke_live_sources.py`, 11/11 UP as of
 last run) — no simulated or placeholder data anywhere in the pipeline:
 
 | Source | Authority | Used for |
@@ -121,7 +121,7 @@ pattern-based checks that enforce it against real model output.
 
 ## Evaluation
 
-**174/174 offline tests pass in under a second** — no network or LLM calls in
+**181/181 offline tests pass in under a second** — no network or LLM calls in
 the regression suite itself:
 
 ```bash
@@ -174,6 +174,35 @@ through. Fixed by making the exemption field-aware — critical_conditions
 and next_diligence are action-item fields by construction, so a target-
 naming phrase there is never an overclaim regardless of grammar; the
 same phrase in rationale or unresolved_risks still is.)*
+
+## Executive dashboard
+
+```bash
+make app
+```
+
+A Streamlit presentation layer over everything below - recommendation
+banner, gate rollup, the ten-domain investigation journey, the
+deterministic-policy-bounds-LLM decisioning diagrams for both the
+planner and the recommendation drafter, evidence provenance with
+SHA-256 verification, the full draft recommendation, a human-review
+form that calls the real `human_review.finalize_recommendation()`, and
+the evaluation/observability numbers. Defaults to the frozen example
+(no credentials, no network) with a sidebar toggle to point at a live
+`data/spikes/<run>/` directory instead.
+
+**The app is a thin display/invocation layer, not a second
+implementation.** `streamlit_app.py` and `app/data_loader.py` contain
+no screening rules, no recommendation policy, and no approval logic -
+they read the same JSON this README's terminal walkthrough reads, and
+the one interactive action (human review) calls
+`renewable_intelligence.synthesis.human_review.finalize_recommendation()`
+directly, against an in-memory copy of the draft so a demo session
+never touches the canonical checkpoint. See
+`tests/integration/test_streamlit_app.py` for the headless regression
+tests, including that a reject-without-comment or an out-of-envelope
+override without justification correctly surfaces the real backend
+validation error rather than being silently accepted by the UI.
 
 ## Demo walkthrough
 
@@ -247,6 +276,9 @@ uncommitted re-run instead.
 ## Repository structure
 
 ```text
+streamlit_app.py      Executive dashboard (`make app`) - display/invoke only
+app/data_loader.py     Read-only JSON view models for the dashboard
+
 src/renewable_intelligence/
   graph/            LangGraph state machine + evidence assessment
   agents/           Planner policy + bounded Foundry planner
@@ -269,13 +301,16 @@ scripts/
                      Post-investigation synthesis + HITL
   trace_project_run.py, smoke_live_sources.py
                      Observability
+  export_frozen_example.py
+                     Builds/refreshes data/examples/ from the live checkpoint
 
 tests/
   unit/, integration/, evaluation/
-                     174-test offline regression + eval suite
+                     181-test offline regression + eval suite
 
 data/
-  examples/           Frozen, committed synthesis snapshot (`make demo`)
+  examples/           Frozen, committed synthesis + investigation
+                       snapshot (`make demo`, `make app`)
   spikes/             Gitignored - live-run evidence + checkpoint
 
 docs/
