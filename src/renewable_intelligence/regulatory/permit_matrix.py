@@ -99,28 +99,6 @@ KNOWN_REQUIREMENT_CATEGORIES = [
         "status": "ESTABLISHED_REQUIREMENT",
     },
     {
-        "requirement_id": "OK_PENDING_WIND_LEGISLATION",
-        "authority_level": "STATE",
-        "agency": "Oklahoma Legislature",
-        "category": "Pending/emerging setback and zoning legislation",
-        "trigger": (
-            "Legislative session activity as of the "
-            f"reference date ({REFERENCE_TABLE_AS_OF})."
-        ),
-        "citation": (
-            "e.g. Oklahoma SB2 (county-level setback "
-            "provisions) and HB2751 (residential setbacks) "
-            "as introduced/advanced in the 2026 session"
-        ),
-        "applies_to_this_project": (
-            "NOT YET LAW — must be re-checked against "
-            "current legislative status before relying on "
-            "any specific setback figure."
-        ),
-        "process_note": None,
-        "status": "PENDING_NOT_ENACTED",
-    },
-    {
         "requirement_id": "COUNTY_LOCAL_ZONING",
         "authority_level": "COUNTY",
         "agency": "County zoning/planning authority",
@@ -184,9 +162,81 @@ def _resolve_inputs(
             "jurisdiction_summary_artifact."
         )
 
+    legislative_status_path = evidence.get(
+        "legislative_status_artifact"
+    )
+
+    if not legislative_status_path:
+
+        raise RuntimeError(
+            "regulatory_evidence must supply "
+            "legislative_status_artifact. Bill status is "
+            "temporally volatile evidence and must be loaded "
+            "from a timestamped artifact, not hardcoded — see "
+            "scripts/spikes/screen_legislative_status.py."
+        )
+
     return {
         "artifact_path": Path(artifact_path),
+        "legislative_status_path": Path(
+            legislative_status_path
+        ),
     }
+
+
+def _build_legislative_requirement_entries(
+    legislative_status: dict[str, Any],
+) -> list[dict[str, Any]]:
+
+    """
+    Builds requirement-table entries from governed, timestamped
+    legislative-status evidence rather than a hardcoded status
+    string. Bill status changes between legislative sessions;
+    treating it as application source code is exactly the kind
+    of staleness this project's evidence model is meant to
+    prevent elsewhere.
+    """
+
+    source = legislative_status.get("source", {})
+    verified_utc = source.get("verified_utc")
+
+    entries = []
+
+    for bill in legislative_status.get("bills", []):
+
+        entries.append(
+            {
+                "requirement_id": (
+                    f"OK_LEGISLATION_{bill['bill']}"
+                ),
+                "authority_level": "STATE",
+                "agency": "Oklahoma Legislature",
+                "category": (
+                    "Wind-energy setback/zoning legislation "
+                    f"({bill['legislative_session']})"
+                ),
+                "trigger": bill.get("subject"),
+                "citation": (
+                    f"{bill['bill']}, "
+                    f"{bill['legislative_session']}"
+                ),
+                "applies_to_this_project": (
+                    f"{bill['status']} as of "
+                    f"{verified_utc} — "
+                    f"{bill['last_action']} "
+                    f"({bill['last_action_date']}). Does not "
+                    "currently change any statutory setback "
+                    "requirement. Must be re-verified if a new "
+                    "legislative session convenes."
+                ),
+                "process_note": None,
+                "status": bill["status"],
+                "verified_utc": verified_utc,
+                "source_urls": bill.get("source_urls", []),
+            }
+        )
+
+    return entries
 
 
 def build_permit_matrix(
@@ -201,13 +251,32 @@ def build_permit_matrix(
     )
 
     artifact_path = inputs["artifact_path"]
+    legislative_status_path = inputs["legislative_status_path"]
 
     if not artifact_path.exists():
 
         raise FileNotFoundError(artifact_path)
 
+    if not legislative_status_path.exists():
+
+        raise FileNotFoundError(legislative_status_path)
+
     jurisdiction = json.loads(
         artifact_path.read_text(encoding="utf-8")
+    )
+
+    legislative_status = json.loads(
+        legislative_status_path.read_text(encoding="utf-8")
+    )
+
+    legislative_entries = (
+        _build_legislative_requirement_entries(
+            legislative_status
+        )
+    )
+
+    requirement_categories = (
+        KNOWN_REQUIREMENT_CATEGORIES + legislative_entries
     )
 
     domain_outcomes = (
@@ -238,18 +307,32 @@ def build_permit_matrix(
                     "Endangered Species Act consultation"
                 ),
                 "trigger": (
-                    "A federal nexus (e.g. FAA Part 77 "
-                    "notice) combined with designated "
-                    "critical habitat or listed species "
-                    "presence typically triggers ESA "
-                    "Section 7 interagency consultation."
+                    "Section 7 applies to federal AGENCY "
+                    "ACTIONS — a federal permit, license, or "
+                    "funding decision that may affect a "
+                    "listed species or designated critical "
+                    "habitat. Designated critical habitat "
+                    "overlap alone does not establish that "
+                    "formal consultation is required; that "
+                    "depends on whether a federal action is "
+                    "involved and on the action agency's own "
+                    "effects determination, which may instead "
+                    "resolve through informal consultation or "
+                    "concurrence."
                 ),
-                "citation": "16 U.S.C. Section 1536 (ESA Section 7)",
+                "citation": (
+                    "16 U.S.C. Section 1536 (ESA Section 7); "
+                    "50 CFR Part 402"
+                ),
                 "applies_to_this_project": (
-                    "FLAGGED — this project's own species "
-                    "screening already found Final "
-                    "designated critical habitat overlap; "
-                    "see the species domain outcome."
+                    "FLAGGED FOR REVIEW — this project's own "
+                    "species screening found Final designated "
+                    "critical habitat overlap, which is a "
+                    "reason to evaluate Section 7 applicability "
+                    "once a specific federal nexus (e.g. an "
+                    "FAA determination) is identified, not a "
+                    "confirmed consultation requirement by "
+                    "itself; see the species domain outcome."
                 ),
                 "source_evidence": species_finding,
                 "status": "FLAGGED_FROM_PROJECT_EVIDENCE",
@@ -280,22 +363,33 @@ def build_permit_matrix(
                     "Tribal consultation / Section 106 review"
                 ),
                 "trigger": (
-                    "A federal nexus combined with proximity "
-                    "to tribal statistical geography commonly "
-                    "warrants tribal outreach and NHPA "
-                    "Section 106 review, even where legal "
-                    "trust status has not been established."
+                    "If a federal undertaking triggers Section "
+                    "106 (e.g. an FAA determination), the "
+                    "responsible federal agency must identify "
+                    "and consult tribes that may attach "
+                    "religious and cultural significance to "
+                    "affected historic properties — those "
+                    "interests can exist on, or extend well "
+                    "beyond, present tribal lands. PAD-US "
+                    "tribal statistical geography is screening "
+                    "context for which tribes to consider, not "
+                    "the legal basis for the consultation "
+                    "requirement itself."
                 ),
                 "citation": (
                     "National Historic Preservation Act "
-                    "Section 106, 54 U.S.C. Section 306108"
+                    "Section 106, 54 U.S.C. Section 306108; "
+                    "36 CFR Part 800; ACHP tribal consultation "
+                    "guidance"
                 ),
                 "applies_to_this_project": (
-                    "FLAGGED — this project's own land-status "
-                    "screening already found PAD-US tribal "
+                    "FLAGGED FOR REVIEW — this project's own "
+                    "land-status screening found PAD-US tribal "
                     "statistical area and State Land Board "
-                    "overlap; see the land_status domain "
-                    "outcome."
+                    "overlap, which is a reason to identify "
+                    "potentially interested tribes early, not "
+                    "a confirmed Section 106 trigger by itself; "
+                    "see the land_status domain outcome."
                 ),
                 "source_evidence": land_status_finding,
                 "status": "FLAGGED_FROM_PROJECT_EVIDENCE",
@@ -305,19 +399,25 @@ def build_permit_matrix(
 
     established_count = sum(
         1
-        for item in KNOWN_REQUIREMENT_CATEGORIES
+        for item in requirement_categories
         if item["status"] == "ESTABLISHED_REQUIREMENT"
     )
 
     pending_count = sum(
         1
-        for item in KNOWN_REQUIREMENT_CATEGORIES
+        for item in requirement_categories
         if item["status"] == "PENDING_NOT_ENACTED"
+    )
+
+    failed_legislation_count = sum(
+        1
+        for item in requirement_categories
+        if item["status"] == "FAILED"
     )
 
     unverified_count = sum(
         1
-        for item in KNOWN_REQUIREMENT_CATEGORIES
+        for item in requirement_categories
         if item["status"] == "NOT_YET_VERIFIED"
     )
 
@@ -332,10 +432,18 @@ def build_permit_matrix(
         "reference_table_as_of": (
             REFERENCE_TABLE_AS_OF
         ),
+        "legislative_status_verified_utc": (
+            legislative_status.get("source", {}).get(
+                "verified_utc"
+            )
+        ),
         "established_requirement_count": (
             established_count
         ),
         "pending_not_enacted_count": pending_count,
+        "failed_legislation_count": (
+            failed_legislation_count
+        ),
         "not_yet_verified_count": unverified_count,
         "conditional_trigger_count": (
             len(conditional_triggers)
@@ -371,7 +479,7 @@ def build_permit_matrix(
         "jurisdiction": jurisdiction,
 
         "known_requirement_categories": (
-            KNOWN_REQUIREMENT_CATEGORIES
+            requirement_categories
         ),
 
         "conditional_triggers": (
@@ -400,10 +508,16 @@ def build_permit_matrix(
                 "ordinance text was not retrieved."
             ),
             (
-                "Pending Oklahoma legislation (as of "
-                f"{REFERENCE_TABLE_AS_OF}) could change "
-                "setback requirements and must be re-checked "
-                "before relying on any current setback figure."
+                "SB2 and HB2751, the two wind-setback bills "
+                "tracked here, both FAILED in the 2025-2026 "
+                "session (verified against the Oklahoma "
+                "Legislature's own bill-status pages and the "
+                "Senate's press release); neither currently "
+                "changes any statutory setback figure. That "
+                "status was manually verified, not fetched via "
+                "API, and must be re-checked once a new "
+                "legislative session convenes or before relying "
+                "on it after this report ages."
             ),
             (
                 "No permit fees, approval timelines (beyond "

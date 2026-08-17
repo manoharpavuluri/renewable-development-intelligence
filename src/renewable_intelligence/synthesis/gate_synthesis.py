@@ -265,17 +265,13 @@ def _risks_regulatory(finding: dict[str, Any]) -> list[dict[str, Any]]:
 
     risks = []
 
-    if finding.get("pending_not_enacted_count", 0) > 0:
-        risks.append(
-            {
-                "severity": Materiality.LOW,
-                "description": (
-                    "Pending Oklahoma wind-siting legislation "
-                    "could change setback requirements before "
-                    "this project reaches permitting."
-                ),
-            }
-        )
+    # Both tracked wind-setback bills (SB2, HB2751) failed in the
+    # 2025-2026 session (verified against official sources) and
+    # do not currently pose a pending-legislation risk. That
+    # status is manually verified, not API-fetched, and could go
+    # stale if a new session convenes; the timestamp for when it
+    # was last checked lives in finding.legislative_status_
+    # verified_utc for anyone auditing this assessment's currency.
 
     if finding.get("not_yet_verified_count", 0) > 0:
         risks.append(

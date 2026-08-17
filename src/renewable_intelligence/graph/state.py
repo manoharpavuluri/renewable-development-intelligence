@@ -80,6 +80,13 @@ class InvestigationState(TypedDict, total=False):
 
     capability_available: bool | None
 
+    # Distinguishes WHY a capability isn't ready to execute:
+    # "CAPABILITY_REQUIRED" (no handler implemented yet) vs
+    # "EVIDENCE_REQUIRED" (handler exists, but its readiness
+    # check found required governed evidence missing from state).
+    # None when the capability is available and ready.
+    capability_block_reason: str | None
+
     investigation_status: str
 
     investigation_result: dict[str, Any] | None

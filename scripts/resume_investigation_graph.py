@@ -86,6 +86,11 @@ EXPECTED_JURISDICTION_SUMMARY_HASH = (
 )
 
 
+EXPECTED_LEGISLATIVE_STATUS_SUMMARY_HASH = (
+    "e7c613caf47b6b27a83298633e4941d8faaf5523a0abd8066594881e23159d37"
+)
+
+
 EXPECTED_AVIATION_SUMMARY_HASH = (
     "15b7eb63d23b22aa674957ffeedc4971419e464986fcaf7b03e4201f6650242d"
 )
@@ -500,12 +505,26 @@ JURISDICTION_SUMMARY_PATH = (
 )
 
 
+LEGISLATIVE_STATUS_SUMMARY_PATH = (
+    Path(
+        "data/spikes/public_sources_20260815T173207Z"
+        "/gis/legislative_status/ok_wind_legislation_summary.json"
+    )
+)
+
+
 def build_regulatory_evidence():
 
     if not JURISDICTION_SUMMARY_PATH.exists():
 
         raise FileNotFoundError(
             JURISDICTION_SUMMARY_PATH
+        )
+
+    if not LEGISLATIVE_STATUS_SUMMARY_PATH.exists():
+
+        raise FileNotFoundError(
+            LEGISLATIVE_STATUS_SUMMARY_PATH
         )
 
     actual_hash = sha256_file(
@@ -522,9 +541,26 @@ def build_regulatory_evidence():
             "not match the governed expected hash."
         )
 
+    legislative_hash = sha256_file(
+        LEGISLATIVE_STATUS_SUMMARY_PATH
+    )
+
+    if (
+        legislative_hash
+        != EXPECTED_LEGISLATIVE_STATUS_SUMMARY_HASH
+    ):
+
+        raise RuntimeError(
+            "Legislative-status summary artifact hash does "
+            "not match the governed expected hash."
+        )
+
     return {
         "jurisdiction_summary_artifact": str(
             JURISDICTION_SUMMARY_PATH
+        ),
+        "legislative_status_artifact": str(
+            LEGISLATIVE_STATUS_SUMMARY_PATH
         ),
     }
 

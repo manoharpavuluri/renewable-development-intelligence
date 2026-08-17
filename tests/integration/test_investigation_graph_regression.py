@@ -28,6 +28,7 @@ from renewable_intelligence.tools.registry import (
     CapabilityKind,
     enable_capability,
     register_capability,
+    requires_evidence,
 )
 
 
@@ -174,6 +175,84 @@ def test_registered_available_capability_routes_to_execute():
 
     assert update["capability_available"] is True
     assert route_capability({**state, **update}) == "execute"
+
+
+def test_implemented_capability_missing_evidence_blocks_not_executes():
+
+    # Regression test for the exact bug this project hit with
+    # gis.resolve_flood_evidence: enabling a handler made
+    # check_capability report it "available" even though the
+    # evidence it needs was never in state, so the graph routed
+    # straight to execute_capability and crashed with an
+    # uncaught RuntimeError instead of pausing for evidence like
+    # every other missing-evidence case does.
+    register_capability(
+        Capability(
+            name="test.regression_evidence_required",
+            kind=CapabilityKind.PYTHON,
+            description="test fixture",
+            available=False,
+        )
+    )
+
+    enable_capability(
+        "test.regression_evidence_required",
+        handler=lambda **kwargs: {"executed": True},
+        readiness=requires_evidence("test_fixture_evidence"),
+    )
+
+    state_without_evidence = {
+        "selected_capability": (
+            "test.regression_evidence_required"
+        ),
+        "audit_events": [],
+    }
+
+    update = check_capability(state_without_evidence)
+
+    assert update["capability_available"] is False
+    assert update["capability_block_reason"] == "EVIDENCE_REQUIRED"
+    assert (
+        route_capability(
+            {**state_without_evidence, **update}
+        )
+        == "blocked"
+    )
+
+    # Once the evidence is present, the same capability becomes
+    # ready without any code change.
+    state_with_evidence = {
+        **state_without_evidence,
+        "test_fixture_evidence": {"some": "governed evidence"},
+    }
+
+    update_with_evidence = check_capability(state_with_evidence)
+
+    assert update_with_evidence["capability_available"] is True
+    assert (
+        update_with_evidence["capability_block_reason"] is None
+    )
+    assert (
+        route_capability(
+            {**state_with_evidence, **update_with_evidence}
+        )
+        == "execute"
+    )
+
+
+def test_capability_with_no_handler_reports_capability_required():
+
+    state = {
+        "selected_capability": "test.totally_unregistered",
+        "audit_events": [],
+    }
+
+    update = check_capability(state)
+
+    assert update["capability_available"] is False
+    assert (
+        update["capability_block_reason"] == "CAPABILITY_REQUIRED"
+    )
 
 
 # ------------------------------------------------------------
@@ -430,3 +509,120 @@ def test_graph_interrupts_on_missing_capability_and_resumes_same_thread():
     final_snapshot = graph.get_state(config)
 
     assert final_snapshot.next == ()
+
+
+def test_graph_pauses_not_crashes_when_registered_capability_lacks_evidence():
+
+    # Full graph-level regression for the flood_evidence bug:
+    # a capability whose handler is registered and available
+    # BEFORE the graph ever runs, but whose required evidence is
+    # not part of the initial state, must produce a durable
+    # interrupt when the graph reaches it - never an uncaught
+    # RuntimeError from inside execute_capability.
+    register_capability(
+        Capability(
+            name="test.graph_regression_evidence_required",
+            kind=CapabilityKind.PYTHON,
+            description="test fixture",
+            available=False,
+        )
+    )
+
+    def _handler(*, state, task):
+
+        evidence = state.get("test_fixture_evidence")
+
+        if not evidence:
+
+            raise RuntimeError(
+                "handler called without required evidence - "
+                "this should never happen if readiness "
+                "checking works correctly"
+            )
+
+        return {
+            "task_id": task["task_id"],
+            "capability": (
+                "test.graph_regression_evidence_required"
+            ),
+            "executed": True,
+            "finding": {},
+        }
+
+    enable_capability(
+        "test.graph_regression_evidence_required",
+        handler=_handler,
+        readiness=requires_evidence("test_fixture_evidence"),
+    )
+
+    checkpointer = InMemorySaver()
+
+    graph = build_investigation_graph(checkpointer=checkpointer)
+
+    initial_state = {
+        "project_id": "TEST-PROJECT-2",
+        "screening": {"project_id": "TEST-PROJECT-2"},
+        "gate_assessment": {
+            "project_id": "TEST-PROJECT-2",
+            "investigation_queue": [
+                {
+                    "task_id": "INV-B",
+                    "domain": "domain_b",
+                    "status": "PENDING",
+                    "preferred_capability": (
+                        "test.graph_regression_evidence_required"
+                    ),
+                    "priority": "HIGH",
+                }
+            ],
+        },
+        "current_investigation": None,
+        "selected_task_id": None,
+        "selected_capability": None,
+        "capability_available": None,
+        "investigation_status": "INITIALIZED",
+        "investigation_result": None,
+        "evidence_sufficiency": None,
+        "latest_evidence_assessment": None,
+        "evidence_ledger": [],
+        "recommended_follow_up": None,
+        "investigation_history": [],
+        "iteration": 0,
+        "max_iterations": 25,
+        "route_reason": None,
+        "errors": [],
+        "audit_events": [],
+    }
+
+    config = {
+        "configurable": {
+            "thread_id": "test-evidence-required-thread"
+        }
+    }
+
+    # This must not raise. Before the readiness-check fix, a
+    # registered-and-available capability with missing evidence
+    # would be routed straight to execute_capability and crash.
+    result = graph.invoke(initial_state, config=config)
+
+    interrupts = result.get("__interrupt__", [])
+
+    assert interrupts, (
+        "Expected a durable interrupt for missing evidence, "
+        "not silent success or a crash."
+    )
+
+    payload = getattr(interrupts[0], "value", interrupts[0])
+
+    assert payload["block_reason"] == "EVIDENCE_REQUIRED"
+
+    # This regression test's scope stops here deliberately: the
+    # resume-with-evidence round trip for each real capability is
+    # already covered by test_graph_interrupts_on_missing_capability_
+    # and_resumes_same_thread above and by this project's real
+    # gis.resolve_flood_evidence recovery. pause_for_capability
+    # currently merges resume-supplied evidence via a per-
+    # capability elif chain rather than generically, so a synthetic
+    # capability name here has nothing to merge into; that's a
+    # documented simplification opportunity, not something this
+    # test needs to exercise to prove the readiness-check fix works.

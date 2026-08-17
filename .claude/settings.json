@@ -20,7 +20,10 @@
       "WebSearch",
       "WebFetch(domain:adds-faa.opendata.arcgis.com)",
       "Read(//tmp/**)",
-      "Read(//private/tmp/**)"
+      "Read(//private/tmp/**)",
+      "WebFetch(domain:legiscan.com)",
+      "WebFetch(domain:oksenate.gov)",
+      "WebFetch(domain:www.oklegislature.gov)"
     ],
     "additionalDirectories": [
       "/tmp",

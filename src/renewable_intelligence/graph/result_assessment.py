@@ -2927,8 +2927,8 @@ def assess_investigation_result(
             0,
         )
 
-        pending_count = finding.get(
-            "pending_not_enacted_count",
+        failed_legislation_count = finding.get(
+            "failed_legislation_count",
             0,
         )
 
@@ -3010,12 +3010,14 @@ def assess_investigation_result(
                     "categories (FAA Part 77 notice, Oklahoma "
                     "Wind Energy Development Act registration, "
                     "SPP/FERC interconnection) were identified "
-                    f"as applicable, {pending_count} pending "
-                    "(not-yet-enacted) legislative item(s) were "
-                    f"flagged, and {conditional_count} additional "
-                    "federal consultation trigger(s) were "
-                    "derived directly from this project's own "
-                    "prior species and land-status screening "
+                    f"as applicable; {failed_legislation_count} "
+                    "tracked wind-setback bill(s) (SB2, HB2751) "
+                    "were verified FAILED in the 2025-2026 "
+                    "session and do not currently change any "
+                    f"setback requirement; {conditional_count} "
+                    "additional federal consultation trigger(s) "
+                    "were derived directly from this project's "
+                    "own prior species and land-status screening "
                     "evidence."
                 ),
             ],
@@ -3034,10 +3036,11 @@ def assess_investigation_result(
                 ),
 
                 (
-                    "Pending Oklahoma wind-siting legislation "
-                    "has not been enacted and must be re-checked "
-                    "before relying on any specific setback "
-                    "figure."
+                    "SB2 and HB2751 both failed in the "
+                    "2025-2026 session; that status was "
+                    "manually verified (not API-fetched) and "
+                    "must be re-checked once a new legislative "
+                    "session convenes."
                 ),
 
                 (

@@ -478,11 +478,13 @@ def check_capability(
         else None
     )
 
-    available = bool(
+    handler_available = bool(
         capability
         and capability.available
         and capability.handler
     )
+
+    block_reason: str | None = None
 
     if not capability:
 
@@ -491,13 +493,30 @@ def check_capability(
             f"is not registered."
         )
 
-    elif not available:
+        block_reason = "CAPABILITY_REQUIRED"
+
+    elif not handler_available:
 
         reason = (
             f"Capability {capability_name!r} "
             f"is registered but has no "
             f"available implementation."
         )
+
+        block_reason = "CAPABILITY_REQUIRED"
+
+    elif capability.readiness and not capability.readiness(
+        dict(state),
+        state.get("current_investigation") or {},
+    ):
+
+        reason = (
+            f"Capability {capability_name!r} has an "
+            f"implementation, but its required governed "
+            f"evidence is not present in state yet."
+        )
+
+        block_reason = "EVIDENCE_REQUIRED"
 
     else:
 
@@ -506,9 +525,15 @@ def check_capability(
             f"is available."
         )
 
+    available = handler_available and block_reason is None
+
     return {
         "capability_available": (
             available
+        ),
+
+        "capability_block_reason": (
+            block_reason
         ),
 
         "route_reason": reason,
@@ -525,6 +550,7 @@ def check_capability(
                         capability_name
                     ),
                     available=available,
+                    block_reason=block_reason,
                 )
             ]
         ),
@@ -1298,6 +1324,38 @@ def pause_for_capability(
         or {}
     )
 
+    block_reason = state.get(
+        "capability_block_reason"
+    )
+
+    if block_reason == "EVIDENCE_REQUIRED":
+
+        reason_text = (
+            "This capability is implemented, but its "
+            "required governed evidence is not present in "
+            "state yet."
+        )
+
+        resume_instruction_text = (
+            "Supply the required evidence via the resume "
+            "payload, then resume this same LangGraph "
+            "thread. Do not treat this as a missing "
+            "implementation."
+        )
+
+    else:
+
+        reason_text = (
+            "The required deterministic capability has no "
+            "implementation registered yet."
+        )
+
+        resume_instruction_text = (
+            "Implement and register the required "
+            "capability, then resume this same LangGraph "
+            "thread."
+        )
+
 
     # IMPORTANT:
     #
@@ -1308,6 +1366,11 @@ def pause_for_capability(
         {
             "type": (
                 "CAPABILITY_OR_EVIDENCE_REQUIRED"
+            ),
+
+            "block_reason": (
+                block_reason
+                or "CAPABILITY_REQUIRED"
             ),
 
             "project_id": (
@@ -1336,16 +1399,10 @@ def pause_for_capability(
                 )
             ),
 
-            "reason": (
-                "The required deterministic "
-                "capability or governed evidence "
-                "is not currently available."
-            ),
+            "reason": reason_text,
 
             "resume_instruction": (
-                "Supply or implement the required "
-                "capability/evidence, then resume "
-                "this same LangGraph thread."
+                resume_instruction_text
             ),
         }
     )

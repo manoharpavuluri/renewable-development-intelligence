@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Callable
+from typing import Any, Callable
 
 
 class CapabilityKind(StrEnum):
@@ -13,6 +13,49 @@ class CapabilityKind(StrEnum):
     SUBGRAPH = "SUBGRAPH"
 
 
+# ------------------------------------------------------------
+# A capability having a HANDLER (implementation code exists) is
+# a different fact from that handler having what it needs to run
+# right now (governed evidence has been supplied). Conflating
+# them is exactly the bug this project hit with
+# gis.resolve_flood_evidence: the handler was enabled the moment
+# its Python module was written, so check_capability reported it
+# "available" and routed straight to execution before
+# flood_evidence had ever been placed in state - crashing with an
+# uncaught RuntimeError instead of pausing for evidence like every
+# other missing-evidence case does.
+#
+# `readiness`, when set, is called as readiness(state, task) and
+# must return True only when the handler has everything it needs
+# to run without raising. It is checked independently of whether
+# the handler itself exists.
+# ------------------------------------------------------------
+
+ReadinessCheck = Callable[[dict[str, Any], dict[str, Any]], bool]
+
+
+def requires_evidence(*state_keys: str) -> ReadinessCheck:
+
+    """
+    Readiness-check factory for the common case: the handler
+    needs one or more governed-evidence dicts to be present,
+    either on the task (supplied by a resume payload merge) or
+    on the graph state.
+    """
+
+    def _check(
+        state: dict[str, Any],
+        task: dict[str, Any],
+    ) -> bool:
+
+        return all(
+            (task or {}).get(key) or (state or {}).get(key)
+            for key in state_keys
+        )
+
+    return _check
+
+
 @dataclass(frozen=True)
 class Capability:
     name: str
@@ -20,6 +63,7 @@ class Capability:
     description: str
     available: bool
     handler: Callable | None = None
+    readiness: ReadinessCheck | None = None
 
 
 CAPABILITIES: dict[str, Capability] = {}
@@ -235,6 +279,7 @@ for planned in PLANNED_CAPABILITIES:
 def enable_capability(
     name: str,
     handler: Callable,
+    readiness: ReadinessCheck | None = None,
 ) -> None:
 
     existing = CAPABILITIES.get(
@@ -252,4 +297,5 @@ def enable_capability(
         description=existing.description,
         available=True,
         handler=handler,
+        readiness=readiness,
     )
