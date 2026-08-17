@@ -28,7 +28,7 @@ def determine_allowed_categories(
 
     if (
         evidence_sufficiency.get("status")
-        == "INSUFFICIENT_MORE_DILIGENCE_REQUIRED"
+        == "BELOW_MINIMUM_COVERAGE_MORE_DILIGENCE_REQUIRED"
     ):
 
         return {
@@ -43,6 +43,20 @@ def determine_allowed_categories(
         risk
         for gate in gate_syntheses
         for risk in gate.get("material_risks", [])
+    ]
+
+    # DO_NOT_ADVANCE admissibility is gated on an explicit
+    # disqualifying_finding flag (see gate_synthesis.py), not on
+    # CRITICAL severity alone. Severity measures how material a
+    # risk is; disqualifying_finding is a separate, narrower claim
+    # that a specific finding is legally/physically fatal. A
+    # CRITICAL-severity risk that is not disqualifying can still
+    # only reach ADVANCE_WITH_CONDITIONS/HOLD below, not
+    # DO_NOT_ADVANCE.
+    disqualifying_risks = [
+        risk
+        for risk in all_risks
+        if risk.get("disqualifying_finding")
     ]
 
     critical_risk_count = sum(
@@ -70,7 +84,7 @@ def determine_allowed_categories(
     ]
 
 
-    if critical_risk_count > 0:
+    if disqualifying_risks:
 
         return {
             "allowed_categories": [
@@ -78,17 +92,19 @@ def determine_allowed_categories(
                 "DO_NOT_ADVANCE",
             ],
             "reason": (
-                f"{critical_risk_count} CRITICAL-severity "
-                "material risk(s) remain unresolved; ADVANCE "
-                "and ADVANCE_WITH_CONDITIONS are not admissible "
-                "until those are addressed or downgraded by new "
-                "evidence."
+                f"{len(disqualifying_risks)} finding(s) are "
+                "flagged disqualifying_finding=True "
+                f"({'; '.join(r['description'] for r in disqualifying_risks)}); "
+                "ADVANCE and ADVANCE_WITH_CONDITIONS are not "
+                "admissible until those are resolved or "
+                "overturned by new evidence."
             ),
         }
 
 
     if (
-        high_risk_count > 0
+        critical_risk_count > 0
+        or high_risk_count > 0
         or unresolved_gate_ids
         or low_confidence_gate_ids
     ):
@@ -99,6 +115,7 @@ def determine_allowed_categories(
                 "HOLD",
             ],
             "reason": (
+                f"{critical_risk_count} CRITICAL-severity and "
                 f"{high_risk_count} HIGH-severity material "
                 f"risk(s), {len(unresolved_gate_ids)} unresolved "
                 f"gate(s) ({', '.join(unresolved_gate_ids) or 'none'}), "
@@ -107,9 +124,11 @@ def determine_allowed_categories(
                 f"({', '.join(low_confidence_gate_ids) or 'none'}) "
                 "rule out an unconditional ADVANCE and rule out "
                 "DO_NOT_ADVANCE (no disqualifying finding has "
-                "been established); the choice between advancing "
-                "with explicit conditions and holding for further "
-                "diligence is a genuine judgment call."
+                "been established, even though at least one risk "
+                "may be CRITICAL-severity); the choice between "
+                "advancing with explicit conditions and holding "
+                "for further diligence is a genuine judgment "
+                "call."
             ),
         }
 

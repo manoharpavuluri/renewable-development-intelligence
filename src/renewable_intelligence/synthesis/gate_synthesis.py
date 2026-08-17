@@ -302,6 +302,20 @@ def _risks_interconnection(finding: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+# A material risk MAY set "disqualifying_finding": True to mark
+# itself as legally/physically fatal (e.g. a confirmed BIA trust-
+# land title over the candidate, a designated wilderness area, a
+# runway centerline overlap) rather than merely severe. This is
+# deliberately distinct from severity: severity is a graded scale
+# (LOW/MEDIUM/HIGH/CRITICAL) describing how material a risk is,
+# while disqualifying_finding is a binary flag that only a
+# capability with authority to make that determination should
+# set. None of the current domain risk extractors below produce
+# one for this candidate - every current finding is a screening-
+# level flag requiring further diligence, not a confirmed legal
+# bar - so recommendation_policy.py only restricts to HOLD/
+# DO_NOT_ADVANCE when this flag is actually set, never merely on
+# CRITICAL severity.
 DOMAIN_RISK_EXTRACTORS = {
     "land_status": _risks_land_status,
     "species": _risks_species,
@@ -346,6 +360,11 @@ class GateSynthesis:
                 {
                     "severity": str(item["severity"]),
                     "description": item["description"],
+                    "disqualifying_finding": bool(
+                        item.get(
+                            "disqualifying_finding", False
+                        )
+                    ),
                 }
                 for item in self.material_risks
             ],
@@ -474,10 +493,10 @@ def synthesize_gate(
         status = GateStatus.UNRESOLVED
 
     elif has_high_or_critical_risk:
-        status = GateStatus.CONDITIONALLY_SATISFIED
+        status = GateStatus.SCREENED_WITH_CONDITIONS
 
     else:
-        status = GateStatus.CONDITIONALLY_SATISFIED
+        status = GateStatus.SCREENED_NO_MATERIAL_RISK
 
     return GateSynthesis(
         gate_id=gate_id,

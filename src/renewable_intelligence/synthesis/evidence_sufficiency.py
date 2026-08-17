@@ -8,11 +8,16 @@ CAPABILITY_NAME = "evidence.assess_sufficiency"
 
 
 class SufficiencyStatus(StrEnum):
-    SUFFICIENT_FOR_SCREENING_RECOMMENDATION = (
-        "SUFFICIENT_FOR_SCREENING_RECOMMENDATION"
+    # Deliberately not named "SUFFICIENT" - this status means every
+    # gate has at least the MINIMUM domain coverage required to
+    # draft a bounded, conditions-attached screening recommendation
+    # at all. It says nothing about whether the underlying evidence
+    # is strong (see confidence / material_gaps below for that).
+    MINIMUM_COVERAGE_FOR_SCREENING_RECOMMENDATION = (
+        "MINIMUM_COVERAGE_FOR_SCREENING_RECOMMENDATION"
     )
-    INSUFFICIENT_MORE_DILIGENCE_REQUIRED = (
-        "INSUFFICIENT_MORE_DILIGENCE_REQUIRED"
+    BELOW_MINIMUM_COVERAGE_MORE_DILIGENCE_REQUIRED = (
+        "BELOW_MINIMUM_COVERAGE_MORE_DILIGENCE_REQUIRED"
     )
 
 
@@ -84,7 +89,7 @@ def assess_evidence_sufficiency(
 
         status = (
             SufficiencyStatus
-            .INSUFFICIENT_MORE_DILIGENCE_REQUIRED
+            .BELOW_MINIMUM_COVERAGE_MORE_DILIGENCE_REQUIRED
         )
 
         reason = (
@@ -99,7 +104,7 @@ def assess_evidence_sufficiency(
 
         status = (
             SufficiencyStatus
-            .SUFFICIENT_FOR_SCREENING_RECOMMENDATION
+            .MINIMUM_COVERAGE_FOR_SCREENING_RECOMMENDATION
         )
 
         reason = (

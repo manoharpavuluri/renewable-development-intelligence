@@ -25,11 +25,11 @@ DRAFT_PATH = Path(
 
 
 SUFFICIENT = {
-    "status": "SUFFICIENT_FOR_SCREENING_RECOMMENDATION"
+    "status": "MINIMUM_COVERAGE_FOR_SCREENING_RECOMMENDATION"
 }
 
 INSUFFICIENT = {
-    "status": "INSUFFICIENT_MORE_DILIGENCE_REQUIRED"
+    "status": "BELOW_MINIMUM_COVERAGE_MORE_DILIGENCE_REQUIRED"
 }
 
 
@@ -78,13 +78,13 @@ def test_case_b_all_gates_conditionally_satisfied_no_high_risk():
     gates = [
         _gate(
             "G1",
-            status="CONDITIONALLY_SATISFIED",
+            status="SCREENED_WITH_CONDITIONS",
             confidence="HIGH",
             risks=[],
         ),
         _gate(
             "G2",
-            status="CONDITIONALLY_SATISFIED",
+            status="SCREENED_WITH_CONDITIONS",
             confidence="HIGH",
             risks=[],
         ),
@@ -114,6 +114,7 @@ def test_case_c_authoritative_exclusion_admits_do_not_advance():
                         "site is legally prohibited from "
                         "development."
                     ),
+                    "disqualifying_finding": True,
                 }
             ],
         )
@@ -137,7 +138,7 @@ def test_case_d_evidence_insufficient_blocks_any_advance_flavor():
     gates = [
         _gate(
             "G1",
-            status="CONDITIONALLY_SATISFIED",
+            status="SCREENED_WITH_CONDITIONS",
             confidence="HIGH",
             risks=[],
         ),
@@ -177,7 +178,7 @@ def test_case_e_flood_risk_present_alongside_low_materiality_elsewhere():
         ),
         _gate(
             "G4",
-            status="CONDITIONALLY_SATISFIED",
+            status="SCREENED_WITH_CONDITIONS",
             confidence="MEDIUM",
             risks=[],
         ),

@@ -13,7 +13,7 @@ from renewable_intelligence.synthesis.recommendation_policy import (
 def _gate(
     gate_id,
     *,
-    status="CONDITIONALLY_SATISFIED",
+    status="SCREENED_WITH_CONDITIONS",
     materiality="HIGH",
     confidence="MEDIUM",
     risks=None,
@@ -29,11 +29,11 @@ def _gate(
 
 
 SUFFICIENT = {
-    "status": "SUFFICIENT_FOR_SCREENING_RECOMMENDATION",
+    "status": "MINIMUM_COVERAGE_FOR_SCREENING_RECOMMENDATION",
 }
 
 INSUFFICIENT = {
-    "status": "INSUFFICIENT_MORE_DILIGENCE_REQUIRED",
+    "status": "BELOW_MINIMUM_COVERAGE_MORE_DILIGENCE_REQUIRED",
 }
 
 
@@ -47,7 +47,7 @@ def test_evidence_insufficient_only_hold_admissible():
     assert result["allowed_categories"] == ["HOLD"]
 
 
-def test_critical_risk_blocks_advance_and_advance_with_conditions():
+def test_disqualifying_finding_blocks_advance_and_advance_with_conditions():
 
     gates = [
         _gate(
@@ -57,6 +57,7 @@ def test_critical_risk_blocks_advance_and_advance_with_conditions():
                 {
                     "severity": "CRITICAL",
                     "description": "disqualifying finding",
+                    "disqualifying_finding": True,
                 }
             ],
         )
@@ -75,6 +76,36 @@ def test_critical_risk_blocks_advance_and_advance_with_conditions():
     assert set(result["allowed_categories"]) == {
         "HOLD",
         "DO_NOT_ADVANCE",
+    }
+
+
+def test_critical_severity_without_disqualifying_flag_does_not_admit_do_not_advance():
+
+    # A CRITICAL-severity risk is not automatically legally fatal.
+    # Only an explicit disqualifying_finding flag should make
+    # DO_NOT_ADVANCE admissible - see recommendation_policy.py.
+    gates = [
+        _gate(
+            "G3",
+            risks=[
+                {
+                    "severity": "CRITICAL",
+                    "description": "very severe but not fatal",
+                }
+            ],
+        )
+    ]
+
+    result = determine_allowed_categories(
+        evidence_sufficiency=SUFFICIENT,
+        gate_syntheses=gates,
+    )
+
+    assert "DO_NOT_ADVANCE" not in result["allowed_categories"]
+    assert "ADVANCE" not in result["allowed_categories"]
+    assert set(result["allowed_categories"]) == {
+        "ADVANCE_WITH_CONDITIONS",
+        "HOLD",
     }
 
 
@@ -156,8 +187,9 @@ def test_clean_evidence_allows_advance():
 
 def test_no_disqualifying_evidence_never_admits_do_not_advance_alone():
 
-    # Across every non-critical scenario, DO_NOT_ADVANCE must
-    # never appear without a CRITICAL risk backing it.
+    # Across every scenario without a disqualifying_finding flag,
+    # DO_NOT_ADVANCE must never appear - not even for a CRITICAL-
+    # severity risk.
     scenarios = [
         [_gate("G1")],
         [_gate("G1", status="UNRESOLVED")],
@@ -167,6 +199,17 @@ def test_no_disqualifying_evidence_never_admits_do_not_advance_alone():
                 "G2",
                 risks=[
                     {"severity": "HIGH", "description": "x"}
+                ],
+            )
+        ],
+        [
+            _gate(
+                "G2",
+                risks=[
+                    {
+                        "severity": "CRITICAL",
+                        "description": "x",
+                    }
                 ],
             )
         ],

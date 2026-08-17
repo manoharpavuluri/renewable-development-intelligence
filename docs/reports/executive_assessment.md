@@ -39,11 +39,11 @@ rather than merely conditioned.
 
 | Gate | Domain(s) | Status | Confidence | Material risks |
 |---|---|---|---|---|
-| G1 — Resource / Physical | wind_resource, terrain, land_cover | CONDITIONALLY_SATISFIED | LOW | 2 (both LOW severity) |
-| G2 — Interconnection | interconnection | CONDITIONALLY_SATISFIED | MEDIUM | 1 HIGH |
+| G1 — Resource / Physical | wind_resource, terrain, land_cover | SCREENED_WITH_CONDITIONS | LOW | 2 (both LOW severity) |
+| G2 — Interconnection | interconnection | SCREENED_WITH_CONDITIONS | MEDIUM | 1 HIGH |
 | G3 — Environmental / Land | land_status, species, flood, cultural | **UNRESOLVED** | MEDIUM | 6 (1 HIGH, 4 MEDIUM, 1 LOW) |
-| G4 — Regulatory | regulatory | CONDITIONALLY_SATISFIED | LOW | 2 (1 MEDIUM, 1 LOW) |
-| G5 — Aviation / Military | aviation | CONDITIONALLY_SATISFIED | MEDIUM | 0 |
+| G4 — Regulatory | regulatory | SCREENED_WITH_CONDITIONS | LOW | 2 (1 MEDIUM, 1 LOW) |
+| G5 — Aviation / Military | aviation | SCREENED_WITH_CONDITIONS | MEDIUM | 0 |
 
 G6 (COD feasibility) and G7 (evidence sufficiency) are assessed separately
 below — they synthesize across G1–G5 rather than covering their own domain.

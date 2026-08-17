@@ -149,7 +149,7 @@ results into one project-level answer:
 flowchart LR
     H["10 domain<br/>investigations<br/>(EXECUTED)"] --> GS["Gate synthesis<br/>G1-G5<br/>(reads real finding/checks<br/>data, not just status string)"]
     GS --> G6["G6<br/>COD feasibility<br/>(only 2 cited durations;<br/>everything else UNRESOLVED)"]
-    G6 --> G7["G7<br/>Evidence sufficiency<br/>(SUFFICIENT_FOR_SCREENING<br/>≠ sufficient for ADVANCE)"]
+    G6 --> G7["G7<br/>Minimum-coverage check<br/>(MINIMUM_COVERAGE_FOR_SCREENING<br/>≠ sufficient for ADVANCE)"]
     G7 --> RP["Recommendation policy<br/>(admissible-set: which of the<br/>4 categories are even legal)"]
     RP --> RD["Foundry draft<br/>(bounded to that set)"]
     RD --> HITL2["DRAFT_PENDING_HUMAN_REVIEW<br/>human_approved: false"]
@@ -163,7 +163,7 @@ available, is this species risk manageable, is this route constructible)
 remains open. The gate synthesis layer reads each domain's actual `finding`/
 `checks` dict — not just that coarse status string — to extract real,
 severity-rated material risks before a gate is allowed to read as
-`CONDITIONALLY_SATISFIED`.
+`SCREENED_WITH_CONDITIONS`.
 
 ---
 

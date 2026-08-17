@@ -44,13 +44,13 @@ For the actual western-Oklahoma candidate (`RDI-WOK-250-001`):
 ```text
 RECOMMENDATION: HOLD                    (status: DRAFT_PENDING_HUMAN_REVIEW)
 COD FEASIBILITY: AT_RISK                (5.3 years to target COD 2031-12-31)
-EVIDENCE SUFFICIENCY: SUFFICIENT_FOR_SCREENING_RECOMMENDATION
+EVIDENCE SUFFICIENCY: MINIMUM_COVERAGE_FOR_SCREENING_RECOMMENDATION
 
-G1 Resource/Physical .... CONDITIONALLY_SATISFIED  (confidence: LOW)
-G2 Interconnection ...... CONDITIONALLY_SATISFIED  (confidence: MEDIUM)
+G1 Resource/Physical .... SCREENED_WITH_CONDITIONS  (confidence: LOW)
+G2 Interconnection ...... SCREENED_WITH_CONDITIONS  (confidence: MEDIUM)
 G3 Environmental/Land ... UNRESOLVED               (confidence: MEDIUM)
-G4 Regulatory ........... CONDITIONALLY_SATISFIED  (confidence: LOW)
-G5 Aviation/Military .... CONDITIONALLY_SATISFIED  (confidence: MEDIUM)
+G4 Regulatory ........... SCREENED_WITH_CONDITIONS  (confidence: LOW)
+G5 Aviation/Military .... SCREENED_WITH_CONDITIONS  (confidence: MEDIUM)
 ```
 
 ## Why HOLD

@@ -7,7 +7,20 @@ from typing import Any
 
 class GateStatus(StrEnum):
     SATISFIED = "SATISFIED"
-    CONDITIONALLY_SATISFIED = "CONDITIONALLY_SATISFIED"
+
+    # All domains for this gate have been screened and no HIGH/
+    # CRITICAL-severity risk was identified. This does NOT mean
+    # the gate has cleared full diligence (SATISFIED) - only that
+    # screening-level evidence found nothing disqualifying.
+    SCREENED_NO_MATERIAL_RISK = "SCREENED_NO_MATERIAL_RISK"
+
+    # All domains for this gate have been screened, but a HIGH/
+    # CRITICAL-severity risk was identified that a screening-
+    # stage recommendation must be conditioned on. Distinct from
+    # SCREENED_NO_MATERIAL_RISK: this gate found something real,
+    # it isn't just "still unresolved."
+    SCREENED_WITH_CONDITIONS = "SCREENED_WITH_CONDITIONS"
+
     UNSATISFIED = "UNSATISFIED"
     UNRESOLVED = "UNRESOLVED"
 
