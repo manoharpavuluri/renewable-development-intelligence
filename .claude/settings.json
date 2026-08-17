@@ -21,6 +21,10 @@
       "WebFetch(domain:adds-faa.opendata.arcgis.com)",
       "Read(//tmp/**)",
       "Read(//private/tmp/**)"
+    ],
+    "additionalDirectories": [
+      "/tmp",
+      "/private/tmp"
     ]
   }
 }

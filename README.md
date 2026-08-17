@@ -141,6 +141,40 @@ every external service above and checks both reachability and schema
 stability — deliberately kept out of the offline suite since a flaky
 government GIS endpoint shouldn't block a commit.
 
+### Recommendation stability
+
+`scripts/eval_recommendation_stability.py` runs the recommendation
+drafter N times (default 20) against one **frozen** evidence packet and
+asserts the deterministic layer (gate synthesis, G6, G7, admissible set)
+is byte-identical every time it's recomputed, while the LLM's
+recommendation is allowed to vary *within* the admissible set — and its
+rationale is checked for grounding violations and for dropping any of
+the frozen scenario's known HIGH risks or evidence gaps. This is the
+project's answer to "the same evidence produced HOLD once and
+ADVANCE_WITH_CONDITIONS on another call": that's not measured as a bug,
+it's measured directly, with an explicit pass/fail bar.
+
+```text
+20 live Foundry runs against RDI-WOK-250-001's frozen evidence:
+
+ADVANCE_WITH_CONDITIONS     12
+HOLD                         8
+determinism violations       0
+policy violations            0
+grounding violations         0
+retention violations         0
+```
+
+*(From the run that validated this eval — see `scripts/eval_recommendation_stability.py`'s
+own output for a fresh run. An earlier pass caught two real gaps in the
+grounding checker itself: it was exempting "identify a constructible
+gen-tie route" from overclaiming only when phrased as an imperative
+sentence, so gerund phrasing and mid-sentence task framing slipped
+through. Fixed by making the exemption field-aware — critical_conditions
+and next_diligence are action-item fields by construction, so a target-
+naming phrase there is never an overclaim regardless of grammar; the
+same phrase in rationale or unresolved_risks still is.)*
+
 ## Demo walkthrough
 
 ```bash
@@ -164,7 +198,10 @@ mlflow ui --backend-store-uri sqlite:///data/runtime/mlflow.db
 # 5. Check every live external source is still up
 .venv/bin/python scripts/smoke_live_sources.py
 
-# 6. (A human, not this script) review and finalize the draft
+# 6. Measure recommendation stability across N live Foundry calls
+.venv/bin/python scripts/eval_recommendation_stability.py
+
+# 7. (A human, not this script) review and finalize the draft
 .venv/bin/python scripts/finalize_recommendation.py \
   --decision approve --reviewer "<your name>"
 ```

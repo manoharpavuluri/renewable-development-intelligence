@@ -147,33 +147,35 @@ _COMPILED = [
 
 
 # Patterns that name a target STATE TO BE ESTABLISHED (e.g.
-# "identify a constructible gen-tie route") rather than asserting
-# that state already holds are legitimate diligence-task phrasing,
-# not overclaiming — but only when the sentence is actually framed
-# as an action item. Every other pattern (bankable, cleared,
-# guarantees, reservation land, cost figures, ...) is flagged
-# regardless of framing, because those claims are never
-# appropriate to assert even as a to-do target.
-_TASK_FRAMING_EXEMPT_PATTERNS = {
+# "identify a constructible gen-tie route", or "map a
+# constructible gen-tie route" buried mid-sentence after "and")
+# rather than asserting that state already holds are legitimate
+# diligence-task phrasing, not overclaiming.
+#
+# An earlier version of this checker tried to detect that framing
+# grammatically (matching a diligence verb at the start of the
+# sentence, including gerund/infinitive forms). That approach was
+# fragile in practice: the recommendation-stability eval caught
+# real drafts like "Define a constructible gen-tie route..." (verb
+# not in the list) and "Start ... and map a constructible gen-tie
+# route..." (the verb is present, but mid-sentence, not at the
+# start) still being flagged.
+#
+# The robust signal is not grammar, it's which FIELD the text
+# came from. The drafter's own prompt (recommendation_drafter.py)
+# defines critical_conditions and next_diligence as inherently
+# action-item fields ("concrete items that must be resolved",
+# "concrete, actionable next steps") and rationale /
+# unresolved_risks as inherently descriptive fields. Exemption is
+# applied per field via scan_draft_fields_for_overclaiming, not by
+# parsing each sentence's grammar.
+EXEMPT_IN_ACTION_FIELDS = {
     "final_poi_claim",
     "constructible_gen_tie_claim",
 }
 
-_DILIGENCE_ACTION_VERBS = (
-    r"identify|confirm|determine|establish|verify|obtain|"
-    r"assess|investigate|complete|resolve|retrieve|request|"
-    r"commission|open|map|perform|replace|initiate|conduct"
-)
-
-_TASK_FRAMING_RE = re.compile(
-    rf"^\s*({_DILIGENCE_ACTION_VERBS})\b",
-    re.IGNORECASE,
-)
-
-
-def _is_diligence_task_framing(text: str) -> bool:
-
-    return bool(_TASK_FRAMING_RE.match(text))
+ACTION_ITEM_FIELDS = {"critical_conditions", "next_diligence"}
+DECLARATIVE_FIELDS = {"rationale", "unresolved_risks"}
 
 
 def scan_text_for_overclaiming(
@@ -182,12 +184,7 @@ def scan_text_for_overclaiming(
 
     findings: list[OverclaimFinding] = []
 
-    task_framed = _is_diligence_task_framing(text)
-
     for category, name, compiled in _COMPILED:
-
-        if task_framed and name in _TASK_FRAMING_EXEMPT_PATTERNS:
-            continue
 
         for match in compiled.finditer(text):
 
@@ -212,3 +209,52 @@ def scan_strings_for_overclaiming(
         for text in strings
         if scan_text_for_overclaiming(text)
     }
+
+
+def scan_draft_fields_for_overclaiming(
+    *,
+    rationale: str,
+    critical_conditions: list[str],
+    unresolved_risks: list[str],
+    next_diligence: list[str],
+) -> dict[str, list[OverclaimFinding]]:
+
+    """
+    Field-aware scan of a recommendation draft. critical_conditions
+    and next_diligence are action-item fields by construction, so
+    a target-state-naming pattern (EXEMPT_IN_ACTION_FIELDS) found
+    there is not flagged; every other pattern, and every pattern
+    in the declarative fields (rationale, unresolved_risks), is
+    flagged regardless of phrasing.
+    """
+
+    fields = {
+        "rationale": [rationale],
+        "critical_conditions": critical_conditions,
+        "unresolved_risks": unresolved_risks,
+        "next_diligence": next_diligence,
+    }
+
+    violations: dict[str, list[OverclaimFinding]] = {}
+
+    for field_name, items in fields.items():
+
+        is_action_field = field_name in ACTION_ITEM_FIELDS
+
+        for item in items:
+
+            findings = scan_text_for_overclaiming(item)
+
+            if is_action_field:
+
+                findings = [
+                    f
+                    for f in findings
+                    if f.pattern_name
+                    not in EXEMPT_IN_ACTION_FIELDS
+                ]
+
+            if findings:
+                violations[f"{field_name}: {item}"] = findings
+
+    return violations

@@ -1,4 +1,4 @@
-.PHONY: demo test smoke trace synthesize mlflow-ui help
+.PHONY: demo test smoke trace synthesize stability mlflow-ui help
 
 VENV := .venv/bin
 export PYTHONPATH := src
@@ -11,6 +11,7 @@ help:
 	@echo "make smoke       - live-network check of every external evidence source"
 	@echo "make synthesize  - re-run gate synthesis / G6 / G7 / recommendation draft (calls Foundry)"
 	@echo "make trace       - log one full pipeline trace to MLflow (calls Foundry)"
+	@echo "make stability   - recommendation-stability eval, N live Foundry runs (default 20)"
 	@echo "make mlflow-ui   - open the MLflow trace viewer"
 
 demo:
@@ -47,6 +48,9 @@ synthesize:
 
 trace:
 	RDI_THREAD_ID=$(RDI_THREAD_ID) $(VENV)/python scripts/trace_project_run.py
+
+stability:
+	RDI_THREAD_ID=$(RDI_THREAD_ID) $(VENV)/python scripts/eval_recommendation_stability.py
 
 mlflow-ui:
 	$(VENV)/mlflow ui --backend-store-uri sqlite:///data/runtime/mlflow.db
