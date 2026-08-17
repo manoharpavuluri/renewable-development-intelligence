@@ -1,0 +1,17 @@
+{
+  "project_id": "RDI-WOK-250-001",
+  "project_name": "Western Oklahoma Wind Screening",
+  "scenario_type": "hypothetical_development_screening",
+  "technology": "onshore_wind",
+  "target_capacity_mw": 250,
+  "target_cod": "2031-12-31",
+  "development_stage": "early_stage_screening",
+  "land_control_status": "unknown",
+  "market": "SPP",
+  "project_input_classification": "DEVELOPER_ASSUMPTION",
+  "notes": [
+    "This is a portfolio demonstration scenario.",
+    "The candidate area is not represented as owned, leased, or under option.",
+    "External resource, transmission, environmental, and regulatory evidence must come from public authoritative sources."
+  ]
+}

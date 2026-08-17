@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "name": "RDI-WOK-250-001 Candidate Area",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "project_id": "RDI-WOK-250-001",
+        "classification": "DEVELOPER_ASSUMPTION",
+        "purpose": "early_stage_screening_area"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-99.075, 35.940],
+            [-98.925, 35.940],
+            [-98.925, 36.060],
+            [-99.075, 36.060],
+            [-99.075, 35.940]
+          ]
+        ]
+      }
+    }
+  ]
+}
