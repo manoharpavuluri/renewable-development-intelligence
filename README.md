@@ -46,11 +46,11 @@ RECOMMENDATION: HOLD                    (status: DRAFT_PENDING_HUMAN_REVIEW)
 COD FEASIBILITY: AT_RISK                (5.3 years to target COD 2031-12-31)
 EVIDENCE SUFFICIENCY: MINIMUM_COVERAGE_FOR_SCREENING_RECOMMENDATION
 
-G1 Resource/Physical .... SCREENED_WITH_CONDITIONS  (confidence: LOW)
-G2 Interconnection ...... SCREENED_WITH_CONDITIONS  (confidence: MEDIUM)
-G3 Environmental/Land ... UNRESOLVED               (confidence: MEDIUM)
-G4 Regulatory ........... SCREENED_WITH_CONDITIONS  (confidence: LOW)
-G5 Aviation/Military .... SCREENED_WITH_CONDITIONS  (confidence: MEDIUM)
+G1 Resource/Physical .... SCREENED_NO_MATERIAL_RISK  (confidence: LOW)
+G2 Interconnection ...... SCREENED_WITH_CONDITIONS    (confidence: MEDIUM)
+G3 Environmental/Land ... UNRESOLVED                 (confidence: MEDIUM)
+G4 Regulatory ........... SCREENED_NO_MATERIAL_RISK  (confidence: LOW)
+G5 Aviation/Military .... SCREENED_NO_MATERIAL_RISK  (confidence: MEDIUM)
 ```
 
 ## Why HOLD

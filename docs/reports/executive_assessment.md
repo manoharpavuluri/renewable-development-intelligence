@@ -39,11 +39,11 @@ rather than merely conditioned.
 
 | Gate | Domain(s) | Status | Confidence | Material risks |
 |---|---|---|---|---|
-| G1 — Resource / Physical | wind_resource, terrain, land_cover | SCREENED_WITH_CONDITIONS | LOW | 2 (both LOW severity) |
+| G1 — Resource / Physical | wind_resource, terrain, land_cover | SCREENED_NO_MATERIAL_RISK | LOW | 2 (both LOW severity) |
 | G2 — Interconnection | interconnection | SCREENED_WITH_CONDITIONS | MEDIUM | 1 HIGH |
 | G3 — Environmental / Land | land_status, species, flood, cultural | **UNRESOLVED** | MEDIUM | 6 (1 HIGH, 4 MEDIUM, 1 LOW) |
-| G4 — Regulatory | regulatory | SCREENED_WITH_CONDITIONS | LOW | 2 (1 MEDIUM, 1 LOW) |
-| G5 — Aviation / Military | aviation | SCREENED_WITH_CONDITIONS | MEDIUM | 0 |
+| G4 — Regulatory | regulatory | SCREENED_NO_MATERIAL_RISK | LOW | 1 MEDIUM |
+| G5 — Aviation / Military | aviation | SCREENED_NO_MATERIAL_RISK | MEDIUM | 0 |
 
 G6 (COD feasibility) and G7 (evidence sufficiency) are assessed separately
 below — they synthesize across G1–G5 rather than covering their own domain.
@@ -79,9 +79,10 @@ below — they synthesize across G1–G5 rather than covering their own domain.
 - **Regulatory** — jurisdiction confirmed as Dewey County, OK. Applicable
   requirement categories identified: FAA Part 77 notice, Oklahoma Wind
   Energy Development Act registration (17 O.S. §160.11 et seq.), and
-  SPP/FERC interconnection process. Pending 2026 state legislation (SB2,
-  HB2751) could change setback requirements before this project reaches
-  permitting — flagged, not yet enacted.
+  SPP/FERC interconnection process. Both tracked wind-setback bills (SB2,
+  HB2751) FAILED in the 2025-2026 session and do not currently change any
+  statutory setback requirement — that status is manually verified, not
+  API-fetched, and must be re-checked once a new session convenes.
 
 ---
 
@@ -131,7 +132,8 @@ rather than estimated.
 - Land control unsecured, compounded by tribal/state-land overlap
 - Flood hazard status unknown (not low — unknown)
 - Resource/terrain evidence is single-point, single-year, screening-grade
-- Regulatory path incomplete (county ordinances, pending legislation)
+- Regulatory path incomplete (Dewey County zoning ordinance text not yet
+  retrieved or verified)
 - Aviation screening incomplete (no FAA determination obtained)
 
 ## Next diligence
