@@ -18,8 +18,11 @@ from renewable_intelligence.evaluation.grounding_checks import (
 )
 
 
+# The frozen, committed example (data/examples/) rather than the
+# gitignored data/spikes/ tree, so this check actually runs on a
+# fresh clone and in CI instead of silently skipping.
 DRAFT_PATH = Path(
-    "data/spikes/public_sources_20260815T173207Z"
+    "data/examples/rdi-wok-250-001"
     "/screening/project_assessment_draft.json"
 )
 

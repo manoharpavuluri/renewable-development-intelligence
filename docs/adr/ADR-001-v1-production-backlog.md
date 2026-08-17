@@ -11,7 +11,7 @@ stated scope: a governed agentic screening system that takes a candidate
 wind project through ten authoritative-source investigations, synthesizes
 them into a gate-level assessment, and drafts a bounded, human-reviewed
 recommendation. It runs against real public data, is checkpointed on a
-local SQLite backend, and is covered by a 65-test offline evaluation
+local SQLite backend, and is covered by a 174-test offline evaluation
 suite plus live-source and recommendation-stability checks.
 
 Several capabilities that a production deployment would eventually need
@@ -112,7 +112,7 @@ change.
 
 ### 6. Scheduled source-health monitoring
 
-**Today:** `scripts/smoke_live_sources.py` exists and works — 10/10
+**Today:** `scripts/smoke_live_sources.py` exists and works — 11/11
 sources UP as of last manual run — but nothing runs it on a schedule.
 
 **Production need:** the whole reason this script is separate from the
@@ -125,15 +125,22 @@ blocking anything.
 
 ### 7. CI/CD deployment pipeline
 
-**Today:** tests run locally (`make test`). No CI configuration exists.
+**Today:** `.github/workflows/tests.yml` runs the 174-test offline suite
+on every push/PR (fast, deterministic, no network or Foundry calls). This
+is a test gate, not a deployment pipeline — there is no build, artifact,
+or environment-promotion step, because there is no deployed environment
+for V1 to promote to.
 
-**Production need:** the 65-test offline suite is already CI-shaped
-(fast, deterministic, no network) — it just isn't wired to a pipeline.
+**Production need:** once this system runs as a deployed service rather
+than a local CLI demo, it needs an actual build/deploy pipeline (image
+build, environment promotion, rollback), plus the live smoke suite and
+stability eval (#6, and this project's recommendation-stability eval)
+wired to a scheduled job rather than the PR gate, since both depend on
+external service/model availability.
 
-**Approach:** a CI job running `make test` on every PR; the live smoke
-suite and stability eval (#6, and this project's recommendation-stability
-eval) belong on the scheduled job from #6, not the PR gate, since both
-depend on external service/model availability.
+**Approach:** extend the existing `tests.yml` job rather than replace
+it; add environment-specific deploy jobs once there is a real deployment
+target to promote to.
 
 ### 8. Multi-project tenancy
 

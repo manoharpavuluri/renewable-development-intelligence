@@ -121,7 +121,7 @@ pattern-based checks that enforce it against real model output.
 
 ## Evaluation
 
-**63/63 offline tests pass in under a second** — no network or LLM calls in
+**174/174 offline tests pass in under a second** — no network or LLM calls in
 the regression suite itself:
 
 ```bash
@@ -178,6 +178,16 @@ same phrase in rationale or unresolved_risks still is.)*
 ## Demo walkthrough
 
 ```bash
+# 0. Zero-setup: show the frozen, committed example output - no
+#    credentials, no live checkpoint, no network calls. This is
+#    what `make demo` runs by default from a fresh clone.
+make demo
+
+# Steps 1-7 below re-run the pipeline live and require the
+# original data/spikes/ evidence tree and checkpoint (gitignored,
+# not committed - see "Reproducibility" below) plus Foundry
+# credentials; they are not needed to see the demo output.
+
 # 1. Inspect the completed investigation thread (read-only)
 export RDI_THREAD_ID="RDI-WOK-250-001:screening:v1"
 .venv/bin/python scripts/start_next_project_turn.py   # reports NO_PENDING_INVESTIGATIONS
@@ -218,6 +228,22 @@ and `FOUNDRY_PROJECT_ENDPOINT` / `FOUNDRY_MODEL_NAME` are required for any
 script that invokes the bounded planner or recommendation drafter. Every
 other capability only needs outbound HTTPS to the public sources above.
 
+## Reproducibility
+
+`data/spikes/` is where a live run's fetched evidence artifacts and
+LangGraph checkpoint land; it's gitignored because it's regenerated
+output, not source, and some of it is timestamped per-run. That means a
+fresh clone has no completed investigation to inspect out of the box.
+
+`data/examples/rdi-wok-250-001/` is the fix: a small, committed, frozen
+snapshot of one completed synthesis result (gate rollup, G6/G7, and the
+draft recommendation) for the same western-Oklahoma candidate used
+throughout this README. `make demo` reads from it by default, so the
+walkthrough above works immediately after cloning, with no credentials
+and no network calls. Point `RESULT_DIR` at a live `data/spikes/<run>/`
+directory (see the Demo walkthrough steps 1-7) to see a real,
+uncommitted re-run instead.
+
 ## Repository structure
 
 ```text
@@ -246,12 +272,20 @@ scripts/
 
 tests/
   unit/, integration/, evaluation/
-                     63-test offline regression + eval suite
+                     174-test offline regression + eval suite
+
+data/
+  examples/           Frozen, committed synthesis snapshot (`make demo`)
+  spikes/             Gitignored - live-run evidence + checkpoint
 
 docs/
   architecture/       Diagrams and design rationale
   requirements/       Original business requirements / MVP scope
   data/               Public-source catalog
+  adr/                Architecture decision records
+
+.github/workflows/
+  tests.yml           CI: runs the offline suite on push/PR
 ```
 
 ## Limitations

@@ -2,12 +2,16 @@
 
 VENV := .venv/bin
 export PYTHONPATH := src
-RESULT_DIR ?= data/spikes/public_sources_20260815T173207Z
+# Defaults to the frozen, committed example so `make demo` works
+# from a fresh clone with no live evidence collection or Foundry
+# calls. Point RESULT_DIR at a live data/spikes/<run>/ directory
+# (gitignored - see README) to see a real, uncommitted run instead.
+RESULT_DIR ?= data/examples/rdi-wok-250-001
 RDI_THREAD_ID ?= RDI-WOK-250-001:screening:v1
 
 help:
-	@echo "make demo        - show the completed screening + draft recommendation (no re-run)"
-	@echo "make test        - run the 63-test offline evaluation harness"
+	@echo "make demo        - show the completed screening + draft recommendation (frozen example, no re-run)"
+	@echo "make test        - run the offline evaluation harness"
 	@echo "make smoke       - live-network check of every external evidence source"
 	@echo "make synthesize  - re-run gate synthesis / G6 / G7 / recommendation draft (calls Foundry)"
 	@echo "make trace       - log one full pipeline trace to MLflow (calls Foundry)"

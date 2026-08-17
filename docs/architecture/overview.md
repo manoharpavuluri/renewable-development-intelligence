@@ -43,7 +43,7 @@ flowchart TB
         direction LR
         CKPT["LangGraph checkpoint<br/>(SQLite, same-thread resume)"]
         AUDIT["Audit event log"]
-        EVAL["63-test offline<br/>evaluation harness"]
+        EVAL["174-test offline<br/>evaluation harness"]
         MLF["MLflow tracing"]
         APPR["Human approval<br/>(finalize_recommendation.py)"]
     end
@@ -179,7 +179,7 @@ severity-rated material risks before a gate is allowed to read as
 | Gate / schedule / sufficiency synthesis | `src/renewable_intelligence/synthesis/` |
 | Human finalization (the only `human_approved: true` path) | `src/renewable_intelligence/synthesis/human_review.py` |
 | Checkpointing (thread resume, no replay) | `src/renewable_intelligence/persistence/checkpointing.py` |
-| Evaluation harness (63 tests, offline) | `tests/unit/`, `tests/integration/`, `tests/evaluation/` |
+| Evaluation harness (174 tests, offline) | `tests/unit/`, `tests/integration/`, `tests/evaluation/` |
 | Live-source drift check (not CI-gated) | `scripts/smoke_live_sources.py` |
 | Full-pipeline trace | `scripts/trace_project_run.py` |
 
