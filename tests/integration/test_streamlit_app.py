@@ -28,45 +28,116 @@ def _fresh_app():
     return at
 
 
+def _page_radio(at):
+
+    return [r for r in at.radio if r.label == "Page"][0]
+
+
+def _decision_radio(at):
+
+    return [r for r in at.radio if r.label == "Decision"][0]
+
+
+def _button(at, label):
+
+    return [b for b in at.button if b.label == label][0]
+
+
 def test_app_renders_without_exception_in_frozen_mode():
 
     at = _fresh_app()
 
     assert not at.exception
-    assert len(at.tabs) == 7
+    assert set(_page_radio(at).options) == {
+        "Decision",
+        "Investigation",
+        "Evidence",
+        "Review",
+    }
 
 
-def test_switching_to_live_mode_does_not_crash():
+def test_switching_to_current_workspace_mode_does_not_crash():
 
     at = _fresh_app()
 
-    at.sidebar.radio[0].set_value("Live project").run(timeout=30)
+    mode_radio = [
+        r for r in at.sidebar.radio if r.label == "Data source"
+    ][0]
+
+    mode_radio.set_value("Current Workspace").run(timeout=30)
 
     assert not at.exception
 
 
-def test_planner_decisioning_tab_selection_does_not_crash():
+def test_review_evidence_button_navigates_to_evidence_page():
 
     at = _fresh_app()
 
-    tab3 = at.tabs[2]
+    _button(at, "Review evidence").click().run(timeout=30)
 
-    if tab3.selectbox:
-        tab3.selectbox[0].set_value(0).run(timeout=30)
+    assert not at.exception
+    assert at.session_state["page"] == "Evidence"
+
+
+def test_full_recommendation_button_navigates_to_review_page():
+
+    at = _fresh_app()
+
+    _button(at, "Full recommendation").click().run(timeout=30)
+
+    assert not at.exception
+    assert at.session_state["page"] == "Review"
+
+
+@pytest.mark.parametrize(
+    "page", ["Decision", "Investigation", "Evidence", "Review"]
+)
+def test_each_page_renders_without_exception(page):
+
+    at = _fresh_app()
+
+    _page_radio(at).set_value(page).run(timeout=30)
 
     assert not at.exception
 
 
-def test_evidence_provenance_tab_selection_does_not_crash():
+def test_evidence_page_provenance_selection_does_not_crash():
 
     at = _fresh_app()
 
-    tab4 = at.tabs[3]
+    _page_radio(at).set_value("Evidence").run(timeout=30)
 
-    if tab4.selectbox:
-        tab4.selectbox[0].set_value(
-            tab4.selectbox[0].options[0]
+    if at.selectbox:
+        at.selectbox[0].set_value(
+            at.selectbox[0].options[0]
         ).run(timeout=30)
+
+    assert not at.exception
+
+
+def test_how_the_ai_works_panel_opens_and_closes():
+
+    at = _fresh_app()
+
+    _button(at, "⚙️ How the AI works").click().run(timeout=30)
+
+    assert not at.exception
+    assert at.session_state["show_how_it_works"] is True
+
+    _button(at, "← Back to the decision").click().run(timeout=30)
+
+    assert not at.exception
+    assert at.session_state["show_how_it_works"] is False
+
+
+def test_planner_trace_selection_inside_how_it_works_does_not_crash():
+
+    at = _fresh_app()
+
+    _button(at, "⚙️ How the AI works").click().run(timeout=30)
+
+    if at.selectbox:
+        at.selectbox[0].set_value(0).run(timeout=30)
 
     assert not at.exception
 
@@ -75,10 +146,11 @@ def test_human_review_approve_calls_real_finalize_and_sets_final():
 
     at = _fresh_app()
 
-    tab6 = at.tabs[5]
-    tab6.text_input[0].set_value("Test Reviewer")
-    tab6.radio[0].set_value("approve")
-    tab6.button[0].click().run(timeout=30)
+    _page_radio(at).set_value("Review").run(timeout=30)
+
+    at.text_input[0].set_value("Test Reviewer")
+    _decision_radio(at).set_value("approve")
+    _button(at, "Submit review").click().run(timeout=30)
 
     assert not at.exception
 
@@ -96,16 +168,16 @@ def test_human_review_reject_without_comment_is_rejected():
     # real ValueError, not silently succeed.
     at = _fresh_app()
 
-    tab6 = at.tabs[5]
-    tab6.text_input[0].set_value("Test Reviewer")
-    tab6.radio[0].set_value("reject")
-    tab6.button[0].click().run(timeout=30)
+    _page_radio(at).set_value("Review").run(timeout=30)
+
+    at.text_input[0].set_value("Test Reviewer")
+    _decision_radio(at).set_value("reject")
+    _button(at, "Submit review").click().run(timeout=30)
 
     assert not at.exception
     assert "review_result" not in at.session_state
     assert any(
-        "comment is required" in e.value
-        for e in at.tabs[5].error
+        "comment is required" in e.value for e in at.error
     )
 
 
@@ -117,19 +189,27 @@ def test_human_review_modify_outside_envelope_requires_justification():
     # the real backend validation, not the UI.
     at = _fresh_app()
 
-    tab6 = at.tabs[5]
-    tab6.text_input[0].set_value("Test Reviewer")
-    tab6.radio[0].set_value("modify")
+    _page_radio(at).set_value("Review").run(timeout=30)
+
+    at.text_input[0].set_value("Test Reviewer")
+    _decision_radio(at).set_value("modify")
     at.run(timeout=30)
 
-    tab6 = at.tabs[5]
-    tab6.selectbox[0].set_value("DO_NOT_ADVANCE")
-    tab6.button[0].click().run(timeout=30)
+    _decision_radio(at).set_value("modify")
+
+    override_select = [
+        s
+        for s in at.selectbox
+        if s.label == "Override recommendation"
+    ][0]
+
+    override_select.set_value("DO_NOT_ADVANCE")
+    _button(at, "Submit review").click().run(timeout=30)
 
     assert not at.exception
     assert "review_result" not in at.session_state
     assert any(
         "falls outside the deterministic admissible set"
         in e.value
-        for e in at.tabs[5].error
+        for e in at.error
     )

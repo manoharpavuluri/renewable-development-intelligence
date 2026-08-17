@@ -121,7 +121,7 @@ pattern-based checks that enforce it against real model output.
 
 ## Evaluation
 
-**181/181 offline tests pass in under a second** — no network or LLM calls in
+**188/188 offline tests pass in under a second** — no network or LLM calls in
 the regression suite itself:
 
 ```bash
@@ -181,20 +181,31 @@ same phrase in rationale or unresolved_risks still is.)*
 make app
 ```
 
-A Streamlit presentation layer over everything below - recommendation
-banner, gate rollup, the ten-domain investigation journey, the
-deterministic-policy-bounds-LLM decisioning diagrams for both the
-planner and the recommendation drafter, evidence provenance with
-SHA-256 verification, the full draft recommendation, a human-review
-form that calls the real `human_review.finalize_recommendation()`, and
-the evaluation/observability numbers. Defaults to the frozen example
-(no credentials, no network) with a sidebar toggle to point at a live
-`data/spikes/<run>/` directory instead.
+A Streamlit presentation layer built around the business question, not
+the architecture. It opens on **Decision** - the recommendation, why,
+and the development outlook - with three more pages (**Investigation**,
+**Evidence**, **Review**) reachable from a page selector or directly
+from the decision card's own buttons. LangGraph, the admissible-set
+diagrams, evidence hashes, and the 188-test/MLflow/live-source numbers
+all still exist, but live behind a single **"How the AI works"** button
+in the sidebar rather than being the first thing a reader sees.
+
+Two data-source modes, toggled in the sidebar:
+- **Demo Project** (default) - the committed western-Oklahoma example.
+  No credentials, no network calls, cannot fail.
+- **Current Workspace** - the latest completed screening run on this
+  machine (`data/spikes/<run>/`). This reads an already-completed run;
+  it does not re-execute the agent. If a run's evidence exists but its
+  UI-detail export doesn't yet, the Investigation page offers a
+  **Generate view** button that runs the same export script instead of
+  showing a terminal command.
 
 **The app is a thin display/invocation layer, not a second
 implementation.** `streamlit_app.py` and `app/data_loader.py` contain
 no screening rules, no recommendation policy, and no approval logic -
-they read the same JSON this README's terminal walkthrough reads, and
+every per-domain risk shown is computed by
+`gate_synthesis.DOMAIN_RISK_EXTRACTORS` (the same functions the real
+gate rollup calls) at export time, never reclassified in the UI, and
 the one interactive action (human review) calls
 `renewable_intelligence.synthesis.human_review.finalize_recommendation()`
 directly, against an in-memory copy of the draft so a demo session
@@ -306,7 +317,7 @@ scripts/
 
 tests/
   unit/, integration/, evaluation/
-                     181-test offline regression + eval suite
+                     188-test offline regression + eval suite
 
 data/
   examples/           Frozen, committed synthesis + investigation

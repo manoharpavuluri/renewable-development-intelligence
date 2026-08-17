@@ -2,12 +2,27 @@
   {
     "domain": "interconnection",
     "gate_id": "G2",
+    "material_risks": [
+      {
+        "severity": "HIGH",
+        "description": "Candidate-specific generator interconnection feasibility and network-upgrade cost have not been established; only screening-level HCT comparisons exist."
+      }
+    ],
     "question": "What transmission facilities and plausible points of interconnection are relevant to the candidate site?",
     "reason": "Interconnection can materially affect project economics and schedule, and candidate-specific evidence is currently absent.",
     "source_authority": null,
     "source_dataset": null,
     "evidence_quality": "HIGH",
     "evidence_quality_reason": null,
+    "interpretation_limits": [
+      "The result applies only to the SPP HCT model cases and POIs explicitly supplied.",
+      "An additional screened POI does not establish that all plausible POIs have been evaluated.",
+      "HCT screening does not establish generator-interconnection feasibility.",
+      "The result does not establish candidate-specific network-upgrade cost.",
+      "The result does not establish a constructible gen-tie route or ROW availability.",
+      "A screening-preferred POI is not necessarily the globally optimal or ultimately feasible POI.",
+      "availableCapacity is retained as a raw HCT field and is not interpreted as hosting capacity."
+    ],
     "screening_status": "HUMAN_DILIGENCE_REQUIRED",
     "gate_status": "UNRESOLVED",
     "decision_confidence": "MEDIUM",
@@ -33,12 +48,24 @@
   {
     "domain": "wind_resource",
     "gate_id": "G1",
+    "material_risks": [
+      {
+        "severity": "LOW",
+        "description": "Wind-resource evidence is a single modeled grid point over a single calendar year; candidate-wide, multi-year resource is unresolved."
+      }
+    ],
     "question": "What is the multi-year modeled wind-resource profile across the candidate polygon?",
     "reason": "Current resource evidence represents only one year and one grid location.",
     "source_authority": null,
     "source_dataset": "HRRR MET Toolkit",
     "evidence_quality": "LOW",
     "evidence_quality_reason": "HRRR is authoritative modeled meteorological data with a full year of hourly observations at one grid point, but it is a single modeled point (not the full candidate polygon), covers only one calendar year, and is not met-tower measured data.",
+    "interpretation_limits": [
+      "This represents one modeled HRRR grid point, not the full candidate polygon; spatial variability across the site has not been characterized.",
+      "Only one calendar year (2025) is included; multi-year resource variability has not been established.",
+      "HRRR values are modeled meteorological data, not on-site met-tower measurements.",
+      "No turbine power curve has been applied; this does not represent AEP, capacity factor, P50, or P90."
+    ],
     "screening_status": "HUMAN_DILIGENCE_REQUIRED",
     "gate_status": "UNRESOLVED",
     "decision_confidence": "LOW",
@@ -57,12 +84,24 @@
   {
     "domain": "terrain",
     "gate_id": "G1",
+    "material_risks": [
+      {
+        "severity": "LOW",
+        "description": "14.3% of the sampled candidate area exceeds 15% slope; no constructability threshold has been applied."
+      }
+    ],
     "question": "What elevation and slope constraints occur inside the candidate polygon?",
     "reason": "Terrain suitability has not yet been measured.",
     "source_authority": "U.S. Geological Survey",
     "source_dataset": "3D Elevation Program (3DEP) Bare Earth DEM",
     "evidence_quality": "MEDIUM",
     "evidence_quality_reason": "USGS 3DEP bare-earth DEM is authoritative federal elevation data resampled to a 10 m screening grid; slope is a central-difference estimate suitable for early-stage screening, not survey-grade micro-siting.",
+    "interpretation_limits": [
+      "Slope statistics are computed on a 10 m resampled grid and are screening-grade, not survey-grade.",
+      "No wind-development slope-suitability threshold is applied or endorsed by this screening; constructability and micro-siting thresholds are project- and vendor-specific.",
+      "This does not account for land cover, access roads, geotechnical conditions, or other constructability factors beyond elevation/slope.",
+      "Relief and slope statistics describe the full candidate polygon, not a specific turbine layout or usable/developable acreage."
+    ],
     "screening_status": "HUMAN_DILIGENCE_REQUIRED",
     "gate_status": "UNRESOLVED",
     "decision_confidence": "MEDIUM",
@@ -82,12 +121,19 @@
   {
     "domain": "land_cover",
     "gate_id": "G1",
+    "material_risks": [],
     "question": "What land-cover classes occur inside the candidate polygon?",
     "reason": "Gross acreage cannot be treated as usable development acreage without land-cover context.",
     "source_authority": "U.S. Geological Survey / Multi-Resolution Land Characteristics (MRLC) Consortium",
     "source_dataset": "National Land Cover Database (NLCD), Annual",
     "evidence_quality": "MEDIUM",
     "evidence_quality_reason": "NLCD is an authoritative, nationally consistent 30 m land-cover product with real class-composition statistics for the candidate area, but it is screening-grade and does not substitute for a site-specific land-cover or wetland survey.",
+    "interpretation_limits": [
+      "NLCD classification is nationally consistent 30 m screening-grade data, not a site-specific survey.",
+      "No land-cover class is treated as a development exclusion in this screening; layout, access, and turbine-siting compatibility must be assessed separately.",
+      "This does not establish jurisdictional wetland status; the governed NWI wetlands evidence already collected for this candidate is the more relevant wetlands source.",
+      "Developable/usable acreage after exclusions, setbacks, and layout constraints has not been established."
+    ],
     "screening_status": "HUMAN_DILIGENCE_REQUIRED",
     "gate_status": "UNRESOLVED",
     "decision_confidence": "MEDIUM",
@@ -106,12 +152,24 @@
   {
     "domain": "species",
     "gate_id": "G3",
+    "material_risks": [
+      {
+        "severity": "HIGH",
+        "description": "Final designated USFWS critical habitat for a federally Endangered species overlaps the candidate; ESA Section 7 consultation is likely required where a federal nexus exists."
+      }
+    ],
     "question": "What ESA-listed or sensitive species and habitat concerns apply to the candidate?",
     "reason": "Species-related constraints can alter layout, study requirements, permitting, and schedule.",
     "source_authority": "U.S. Fish and Wildlife Service",
     "source_dataset": "USFWS Critical Habitat (Final + Proposed)",
     "evidence_quality": "MEDIUM",
     "evidence_quality_reason": "USFWS Critical Habitat is authoritative, Federal-Register-published federal data with real species, listing-status, and citation attributes for the candidate area, but designated critical habitat is only one component of a full ESA screening.",
+    "interpretation_limits": [
+      "This screening covers only USFWS Final and Proposed designated critical habitat; it is not equivalent to a USFWS IPaC official species list, which also covers ESA-listed species without designated critical habitat, migratory birds, and bald/golden eagle concerns.",
+      "This screening does not constitute or substitute for ESA Section 7 consultation.",
+      "Critical habitat overlap does not by itself establish that wind development is prohibited; it establishes that federal consultation requirements are likely to apply.",
+      "Federal Register publication and status fields should be reconciled against the current Federal Register record before relying on this screening for permitting timelines."
+    ],
     "screening_status": "HUMAN_DILIGENCE_REQUIRED",
     "gate_status": "UNRESOLVED",
     "decision_confidence": "MEDIUM",
@@ -131,12 +189,33 @@
   {
     "domain": "land_status",
     "gate_id": "G3",
+    "material_risks": [
+      {
+        "severity": "MEDIUM",
+        "description": "PAD-US tribal statistical area overlaps the candidate; authoritative tribal legal/trust status has not been established."
+      },
+      {
+        "severity": "MEDIUM",
+        "description": "State Land Board (CLO) lands overlap the candidate; lease/sale eligibility has not been established."
+      },
+      {
+        "severity": "LOW",
+        "description": "A state wildlife management area overlaps the candidate; access/use restrictions have not been established."
+      }
+    ],
     "question": "What tribal, trust, state-land, wildlife-area, and other land-management implications apply to the intersecting PAD-US units?",
     "reason": "PAD-US identifies tribal statistical geography, State Land Board land, and a wildlife management area, but those records do not by themselves establish development rights or prohibitions.",
     "source_authority": "U.S. Geological Survey",
     "source_dataset": "Protected Areas Database of the United States",
     "evidence_quality": "MEDIUM",
     "evidence_quality_reason": "PAD-US provides authoritative federal mapped-unit screening evidence with real acreage, manager, and designation attributes for the candidate area, but PAD-US classification is not itself a legal land-status or land-control determination.",
+    "interpretation_limits": [
+      "PAD-US 'Tribal Statistical Area' designation is Census-derived statistical geography, not a legal trust or reservation boundary.",
+      "PAD-US 'State Land Board' / CLO Lands mapping does not establish lease availability, sale eligibility, or development restrictions.",
+      "PAD-US GAP status is a biodiversity-protection screening classification, not a wind-development legal exclusion.",
+      "Where PAD-US polygons overlap spatially (e.g. a tribal statistical area and CLO lands covering nearly the same footprint here), separate authoritative confirmation is required to determine which designation, if any, actually governs land control.",
+      "This screening does not establish ownership, lease status, easements, or actual legal development restrictions."
+    ],
     "screening_status": "HUMAN_DILIGENCE_REQUIRED",
     "gate_status": "UNRESOLVED",
     "decision_confidence": "MEDIUM",
@@ -156,12 +235,24 @@
   {
     "domain": "regulatory",
     "gate_id": "G4",
+    "material_risks": [
+      {
+        "severity": "MEDIUM",
+        "description": "County/local zoning ordinance text has not been retrieved or verified."
+      }
+    ],
     "question": "What state, county, local, tribal, and federal permits and setback requirements apply?",
     "reason": "The permitting path has not yet been established.",
     "source_authority": null,
     "source_dataset": null,
     "evidence_quality": "LOW",
     "evidence_quality_reason": "This is a screening-level list of well-established requirement CATEGORIES with citations, combined with real county/state jurisdiction identification and conditions flagged from this project's own prior evidence. It is not a complete permit matrix, not legal advice, and has not been reviewed by permitting counsel.",
+    "interpretation_limits": [
+      "This does not establish a complete, authoritative permit matrix; county/local ordinance text was not retrieved.",
+      "Pending Oklahoma legislation (as of 2026-08-17) could change setback requirements and must be re-checked before relying on any current setback figure.",
+      "No permit fees, approval timelines (beyond the FAA's documented 45-day pre-filing window), or approval likelihood are established by this screening.",
+      "This is not legal advice and does not substitute for review by qualified permitting counsel or a permitting consultant."
+    ],
     "screening_status": "HUMAN_DILIGENCE_REQUIRED",
     "gate_status": "UNRESOLVED",
     "decision_confidence": "LOW",
@@ -182,12 +273,19 @@
   {
     "domain": "aviation",
     "gate_id": "G5",
+    "material_risks": [],
     "question": "What FAA, airport, radar, and military compatibility constraints may apply?",
     "reason": "Wind-turbine height makes aviation and military compatibility a material development domain.",
     "source_authority": "Federal Aviation Administration",
     "source_dataset": null,
     "evidence_quality": "MEDIUM",
     "evidence_quality_reason": "FAA-sourced airport locations and Special Use Airspace polygons provide real, authoritative screening evidence, but this is not an FAA obstruction evaluation or airspace determination.",
+    "interpretation_limits": [
+      "This screening does not perform or substitute for the FAA's Obstruction Evaluation / Airport Airspace Analysis (OE/AAA) process; only filing FAA Form 7460-1 and obtaining an airspace determination establishes that.",
+      "Airport distances are computed to point locations, not runway centerlines or approach surfaces.",
+      "Military Training Routes (low-level corridors) were not screened, only Special Use Airspace polygons intersecting the candidate boundary.",
+      "No DoD mission-compatibility, radar, or weather-surveillance review has been performed."
+    ],
     "screening_status": "HUMAN_DILIGENCE_REQUIRED",
     "gate_status": "UNRESOLVED",
     "decision_confidence": "MEDIUM",
@@ -207,12 +305,23 @@
   {
     "domain": "flood",
     "gate_id": "G3",
+    "material_risks": [
+      {
+        "severity": "MEDIUM",
+        "description": "FEMA NFHL has zero digital coverage for the candidate; flood-hazard status is genuinely UNKNOWN, not confirmed low-risk."
+      }
+    ],
     "question": "What alternate authoritative evidence can characterize flood exposure where digital NFHL coverage is unavailable?",
     "reason": "FEMA NFHL/FIRM coverage is absent, so flood exposure remains unknown rather than low.",
     "source_authority": "Federal Emergency Management Agency",
     "source_dataset": "National Flood Hazard Layer",
     "evidence_quality": "LOW",
     "evidence_quality_reason": "FEMA NFHL is authoritative federal flood-hazard data, but this candidate area currently has no digital Flood Hazard Zone or FIRM panel coverage, so NFHL cannot establish flood-hazard status here either way.",
+    "interpretation_limits": [
+      "Absence of digital NFHL/FIRM coverage must not be interpreted as evidence of no flood hazard; it means the area is unmapped.",
+      "No alternate authoritative flood-risk source (e.g. county floodplain study, USGS StreamStats, or a site-specific hydrologic study) has been consulted yet.",
+      "Special Flood Hazard Area (SFHA) overlap, where present, is a screening fact and not an automatic project exclusion."
+    ],
     "screening_status": "HUMAN_DILIGENCE_REQUIRED",
     "gate_status": "UNRESOLVED",
     "decision_confidence": "MEDIUM",
@@ -230,12 +339,24 @@
   {
     "domain": "cultural",
     "gate_id": "G3",
+    "material_risks": [
+      {
+        "severity": "MEDIUM",
+        "description": "At least one NRHP-listed historic resource directly intersects the candidate polygon; Section 106 review has not been performed."
+      }
+    ],
     "question": "What historic and cultural-resource screening concerns occur within or near the candidate?",
     "reason": "Cultural-resource diligence remains unresolved.",
     "source_authority": "National Park Service",
     "source_dataset": "National Register of Historic Places (NRHP)",
     "evidence_quality": "MEDIUM",
     "evidence_quality_reason": "NRHP is authoritative NPS-maintained listing data with real site names and locations, but it covers only formally listed properties and is not a substitute for a Section 106 cultural-resources survey.",
+    "interpretation_limits": [
+      "NRHP listing status does not by itself establish a development prohibition or required mitigation; it establishes that Section 106 review is likely warranted where there is a federal nexus.",
+      "This dataset covers only formally NRHP-listed properties; unlisted but potentially eligible historic or archaeological resources (including unrecorded tribal cultural sites) are not captured here.",
+      "Point locations are representative, not parcel-accurate; exact building/structure footprints relative to any turbine layout have not been verified.",
+      "This is not a substitute for SHPO or Tribal Historic Preservation Office consultation."
+    ],
     "screening_status": "HUMAN_DILIGENCE_REQUIRED",
     "gate_status": "UNRESOLVED",
     "decision_confidence": "MEDIUM",

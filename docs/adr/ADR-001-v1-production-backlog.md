@@ -11,7 +11,7 @@ stated scope: a governed agentic screening system that takes a candidate
 wind project through ten authoritative-source investigations, synthesizes
 them into a gate-level assessment, and drafts a bounded, human-reviewed
 recommendation. It runs against real public data, is checkpointed on a
-local SQLite backend, and is covered by a 181-test offline evaluation
+local SQLite backend, and is covered by a 188-test offline evaluation
 suite plus live-source and recommendation-stability checks.
 
 Several capabilities that a production deployment would eventually need
@@ -125,7 +125,7 @@ blocking anything.
 
 ### 7. CI/CD deployment pipeline
 
-**Today:** `.github/workflows/tests.yml` runs the 181-test offline suite
+**Today:** `.github/workflows/tests.yml` runs the 188-test offline suite
 on every push/PR (fast, deterministic, no network or Foundry calls). This
 is a test gate, not a deployment pipeline — there is no build, artifact,
 or environment-promotion step, because there is no deployed environment

@@ -11,7 +11,9 @@ files:
   investigation/domain_summaries.json - one card per screened
     domain: the original investigation question, source authority,
     finding narrative, evidence quality, decision confidence,
-    outcome, and remaining diligence.
+    outcome, remaining diligence, and severity-rated material
+    risks (via gate_synthesis.DOMAIN_RISK_EXTRACTORS, not
+    reclassified here).
 
   investigation/evidence_provenance.json - one row per domain:
     authority, dataset, evidence quality, and a SHA-256 of the
@@ -38,6 +40,9 @@ from renewable_intelligence.graph.investigation_graph import (
 )
 from renewable_intelligence.persistence.checkpointing import (
     open_checkpointer,
+)
+from renewable_intelligence.synthesis.gate_synthesis import (
+    DOMAIN_RISK_EXTRACTORS,
 )
 from renewable_intelligence.tools.bootstrap import (
     register_implemented_capabilities,
@@ -108,10 +113,30 @@ def build_domain_summaries(v: dict) -> list[dict]:
 
         finding = (result or {}).get("finding", {})
 
+        # Reuses the exact same per-domain risk-severity classifier
+        # gate_synthesis.py itself calls when rolling up gates - the
+        # icon/status shown for a domain in the UI is a presentation
+        # mapping of these real severity-rated risks, never a
+        # reclassification of the underlying evidence.
+        extractor = DOMAIN_RISK_EXTRACTORS.get(domain)
+
+        material_risks = (
+            [
+                {
+                    "severity": str(risk["severity"]),
+                    "description": risk["description"],
+                }
+                for risk in extractor(finding)
+            ]
+            if extractor
+            else []
+        )
+
         summaries.append(
             {
                 "domain": domain,
                 "gate_id": outcome["gate_id"],
+                "material_risks": material_risks,
                 "question": task.get("question"),
                 "reason": task.get("reason"),
                 "source_authority": finding.get(
@@ -126,6 +151,9 @@ def build_domain_summaries(v: dict) -> list[dict]:
                 "evidence_quality_reason": (
                     result or {}
                 ).get("evidence_quality_reason"),
+                "interpretation_limits": (result or {}).get(
+                    "interpretation_limits", []
+                ),
                 "screening_status": outcome["screening_status"],
                 "gate_status": outcome["gate_status"],
                 "decision_confidence": outcome[
