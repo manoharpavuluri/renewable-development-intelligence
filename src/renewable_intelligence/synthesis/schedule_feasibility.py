@@ -15,6 +15,14 @@ class CODFeasibilityStatus(StrEnum):
     NOT_ASSESSABLE = "NOT_ASSESSABLE"
 
 
+# A development-heuristic threshold, not a regulatory figure -
+# classified BUSINESS_POLICY (see the EvidenceClass vocabulary in
+# domain/screening.py) so it's never confused with the cited
+# statutory durations below.
+SHORT_TIMELINE_THRESHOLD_MONTHS = 24
+SHORT_TIMELINE_THRESHOLD_CLASSIFICATION = "BUSINESS_POLICY"
+
+
 # ------------------------------------------------------------
 # Known, citable regulatory durations. These are the ONLY
 # specific duration figures this module uses; every other
@@ -29,6 +37,7 @@ KNOWN_DURATIONS = [
         "duration_days": 45,
         "duration_type": "MINIMUM_LEAD_TIME",
         "citation": "14 CFR Part 77; FAA Form 7460-1",
+        "evidence_classification": "SOURCE_FACT",
         "note": (
             "Minimum notice before construction start or "
             "permit application, not a total review duration."
@@ -40,6 +49,7 @@ KNOWN_DURATIONS = [
         "duration_type": "STATUTORY_MAXIMUM",
         "citation": "50 CFR 402.14 (90 days consultation + "
         "45 days for Biological Opinion)",
+        "evidence_classification": "SOURCE_FACT",
         "note": (
             "Runs from initiation (i.e. once USFWS has a "
             "complete Biological Assessment), not from project "
@@ -150,28 +160,47 @@ def assess_cod_feasibility(
     ]
 
 
+    # These two lists are experienced-developer heuristics, not
+    # cited regulatory facts (contrast with KNOWN_DURATIONS
+    # above). They are explicitly classified DEVELOPER_ASSUMPTION
+    # so they never get read with the same epistemic weight as
+    # the FAA/ESA statutory durations - matching this project's
+    # SOURCE_FACT / DERIVED_FACT / DEVELOPER_ASSUMPTION vocabulary
+    # (see domain/screening.py EvidenceClass).
     parallelizable_workstreams = [
-        "Environmental screening/consultation (species, "
-        "cultural, land status)",
-        "Regulatory/permitting diligence",
-        "Aviation obstruction filing (once turbine layout and "
-        "heights are set)",
-        "Land control negotiation",
+        {
+            "workstream": item,
+            "evidence_classification": "DEVELOPER_ASSUMPTION",
+        }
+        for item in [
+            "Environmental screening/consultation (species, "
+            "cultural, land status)",
+            "Regulatory/permitting diligence",
+            "Aviation obstruction filing (once turbine layout "
+            "and heights are set)",
+            "Land control negotiation",
+        ]
     ]
 
     critical_path_candidates = [
-        (
-            "SPP generator interconnection study process is "
-            "typically the longest-lead workstream for a "
-            "project of this size and is usually on the "
-            "critical path; duration for this project is not "
-            "yet established."
-        ),
-        (
-            "Land control (lease/option) must be secured before "
-            "most other workstreams can be finalized, and is "
-            "currently unresolved for this candidate."
-        ),
+        {
+            "claim": (
+                "SPP generator interconnection study process is "
+                "typically the longest-lead workstream for a "
+                "project of this size and is usually on the "
+                "critical path; duration for this project is not "
+                "yet established."
+            ),
+            "evidence_classification": "DEVELOPER_ASSUMPTION",
+        },
+        {
+            "claim": (
+                "Land control (lease/option) must be secured "
+                "before most other workstreams can be finalized, "
+                "and is currently unresolved for this candidate."
+            ),
+            "evidence_classification": "DEVELOPER_ASSUMPTION",
+        },
     ]
 
 
@@ -198,15 +227,18 @@ def assess_cod_feasibility(
             "established duration."
         )
 
-    elif months_to_cod < 24:
+    elif months_to_cod < SHORT_TIMELINE_THRESHOLD_MONTHS:
 
         status = CODFeasibilityStatus.AT_RISK
 
         reason = (
             f"Only {years_to_cod} years remain to target COD, "
-            "which is short relative to typical interconnection-"
-            "study and permitting lead times for a project this "
-            "size."
+            "which this project's BUSINESS_POLICY threshold "
+            f"({SHORT_TIMELINE_THRESHOLD_MONTHS} months) treats "
+            "as short relative to typical interconnection-study "
+            "and permitting lead times for a project this size. "
+            "That threshold is a development heuristic, not a "
+            "regulatory or statutory figure."
         )
 
     else:

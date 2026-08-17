@@ -178,6 +178,52 @@ ACTION_ITEM_FIELDS = {"critical_conditions", "next_diligence"}
 DECLARATIVE_FIELDS = {"rationale", "unresolved_risks"}
 
 
+# Patterns that assert an ACHIEVED STATE ("has cleared", "is
+# feasible", "is reservation land", "guarantees") are legitimate,
+# appropriately hedged statements when negated ("has NOT
+# received environmental clearance", "does not guarantee").
+# Patterns that assert a specific INVENTED NUMBER (a duration or
+# a dollar figure) stay flagged even when negated, because
+# negating a specific figure still asserts that figure was
+# meaningfully derived ("will not take less than 18 months"
+# still invents "18 months"); absolute_no_risk_claim is itself
+# already a negation-shaped claim and is excluded from this
+# double-negation logic for the same reason.
+_NEGATION_SENSITIVE_PATTERNS = {
+    "bankable_yield_claim",
+    "unqualified_feasible_claim",
+    "final_poi_claim",
+    "constructible_gen_tie_claim",
+    "faa_clearance_claim",
+    "environmental_clearance_claim",
+    "generic_clearance_claim",
+    "gi_feasibility_confirmed_claim",
+    "reservation_land_claim",
+    "trust_land_claim",
+    "unqualified_legal_status_claim",
+    "guarantee_claim",
+    "ensures_outcome_claim",
+}
+
+_NEGATION_CUE_RE = re.compile(
+    r"\b(no|not|without|lacks?|lacking|never|none|cannot|"
+    r"can't|hasn't|has\s+not|doesn't|does\s+not|isn't|"
+    r"is\s+not|absence\s+of)\b",
+    re.IGNORECASE,
+)
+
+_NEGATION_LOOKBACK_CHARS = 50
+
+
+def _is_negated_context(text: str, match_start: int) -> bool:
+
+    window_start = max(0, match_start - _NEGATION_LOOKBACK_CHARS)
+
+    preceding = text[window_start:match_start]
+
+    return bool(_NEGATION_CUE_RE.search(preceding))
+
+
 def scan_text_for_overclaiming(
     text: str,
 ) -> list[OverclaimFinding]:
@@ -187,6 +233,12 @@ def scan_text_for_overclaiming(
     for category, name, compiled in _COMPILED:
 
         for match in compiled.finditer(text):
+
+            if (
+                name in _NEGATION_SENSITIVE_PATTERNS
+                and _is_negated_context(text, match.start())
+            ):
+                continue
 
             findings.append(
                 OverclaimFinding(

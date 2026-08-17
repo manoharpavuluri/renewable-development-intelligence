@@ -10,3 +10,20 @@ data/spikes/
 __pycache__/
 *.py[cod]
 data/runtime/
+
+# Claude Code local config (machine-specific paths, permission
+# allowlists) - not application configuration.
+.claude/
+
+# Secrets / local env
+.env
+.env.*
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# MLflow local tracking (mirrors data/runtime/mlflow.db, which
+# is itself already covered above)
+mlruns/

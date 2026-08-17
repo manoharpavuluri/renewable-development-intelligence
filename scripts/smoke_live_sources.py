@@ -163,10 +163,14 @@ def _check_reachable(
             (time.monotonic() - start) * 1000, 1
         )
 
-        if response.status_code < 500:
+        if 200 <= response.status_code < 400:
             check.status = SourceStatus.UP
             check.detail = f"HTTP {response.status_code}"
         else:
+            # Includes 4xx: a 403/404 on a source we expect to
+            # be reachable is itself a real drift signal (the
+            # endpoint moved, started requiring auth, etc.), not
+            # a healthy "up". Only 2xx/3xx counts as UP.
             check.status = SourceStatus.DOWN
             check.detail = f"HTTP {response.status_code}"
 
@@ -325,6 +329,20 @@ def run_checks() -> list[SourceCheck]:
                 "live query against this URL)"
             ),
             url="https://opsportal.spp.org/",
+        ),
+        _check_reachable(
+            name="NLR HRRR MET Toolkit (NREL Developer Network)",
+            authority="NREL",
+            used_by_capability=(
+                "wind.analyze_candidate_resource (this checks "
+                "base reachability only - the actual data "
+                "endpoint requires an API key and returns 200 "
+                "only with valid wkt/attributes/email params; "
+                "candidate evidence in this project was drawn "
+                "from a pre-fetched governed artifact, not a "
+                "live query here)"
+            ),
+            url="https://developer.nlr.gov/",
         ),
     ]
 
