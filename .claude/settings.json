@@ -18,7 +18,9 @@
       "Bash(.venv/bin/python -m py_compile src/renewable_intelligence/land/land_status_screening.py src/renewable_intelligence/graph/investigation_graph.py src/renewable_intelligence/graph/result_assessment.py src/renewable_intelligence/graph/state.py src/renewable_intelligence/tools/bootstrap.py scripts/resume_investigation_graph.py)",
       "Bash(.venv/bin/python scripts/test_graph_topology.py)",
       "WebSearch",
-      "WebFetch(domain:adds-faa.opendata.arcgis.com)"
+      "WebFetch(domain:adds-faa.opendata.arcgis.com)",
+      "Read(//tmp/**)",
+      "Read(//private/tmp/**)"
     ]
   }
 }
