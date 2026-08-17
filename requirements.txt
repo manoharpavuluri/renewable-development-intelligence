@@ -4,5 +4,12 @@ shapely==2.1.2
 pyproj==3.7.2
 rasterio==1.5.1
 requests==2.34.2
-langgraph-checkpoint-sqlite
-langgraph-checkpoint-postgres
+langgraph==1.2.11
+langgraph-checkpoint==4.2.0
+langgraph-checkpoint-sqlite==3.1.1
+langgraph-checkpoint-postgres==3.1.2
+azure-ai-projects==2.4.0
+azure-identity==1.25.3
+openai==3.1.0
+pydantic==2.13.4
+pytest==9.1.1
