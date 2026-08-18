@@ -47,28 +47,180 @@ st.set_page_config(
 )
 
 
+# Same visual identity as this project's other published artifacts
+# (architecture diagram, executive memo): Spectral serif for prose/
+# headings, IBM Plex Mono for labels and data, a warm parchment
+# ground, and the risk-severity palette reused verbatim so a color
+# means the same thing here as it does in those documents. Single-
+# theme by design (.streamlit/config.toml pins base="light"), so
+# unlike those two artifacts this doesn't also carry a dark variant
+# - Streamlit's own native chrome (sliders, checkboxes, etc.) can't
+# be retheme'd by page CSS alone, and a half-dark page would be
+# worse than a deliberately light one.
+APP_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --ground: #f0f0e6;
+  --ground-raised: #e7e6d7;
+  --ground-panel: #eae9db;
+  --ink: #202623;
+  --ink-soft: #4d554e;
+  --ink-faint: #7d8377;
+  --accent: #35637f;
+  --accent-warm: #a87830;
+  --line: #c9c7b3;
+  --line-strong: #a8a68f;
+  --risk-low: #5c8060;
+  --risk-medium: #a87830;
+  --risk-high: #a8502f;
+  --risk-critical: #7a2a2a;
+  --shadow: rgba(32, 38, 35, 0.08);
+}
+
+html, body, .stApp, [data-testid="stAppViewContainer"],
+[data-testid="stHeader"], [data-testid="stMain"] {
+  background: var(--ground) !important;
+  color: var(--ink) !important;
+}
+
+.stApp, .stApp p, .stApp li, .stApp span, .stApp label,
+[data-testid="stMarkdownContainer"] {
+  font-family: "Spectral", Georgia, "Iowan Old Style", serif !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Spectral", Georgia, serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+  color: var(--ink) !important;
+}
+
+code, pre, .stCode, [data-testid="stMetricLabel"],
+[data-testid="stMetricValue"], [data-testid="stCaptionContainer"],
+.stCaption, small, [data-testid="stJson"] {
+  font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo,
+    Consolas, monospace !important;
+}
+
+[data-testid="stCaptionContainer"] {
+  color: var(--ink-faint) !important;
+}
+
+a, a:visited { color: var(--accent) !important; }
+
+hr { border-color: var(--line) !important; }
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+  background: var(--ground-raised) !important;
+  border-right: 1px solid var(--line);
+}
+[data-testid="stSidebar"] * {
+  font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+}
+
+/* Bordered containers -> plates */
+[data-testid="stVerticalBlockBorderWrapper"]:has(> div > [data-testid="stVerticalBlock"]) {
+  background: var(--ground-panel) !important;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: 2px !important;
+  box-shadow: 0 1px 2px var(--shadow);
+}
+
+/* Buttons */
+.stButton button, [data-testid="stFormSubmitButton"] button,
+[data-testid="stBaseButton-secondary"] {
+  font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+  font-size: 12px !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--ground-panel) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+}
+.stButton button:hover, [data-testid="stFormSubmitButton"] button:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+/* Page nav / decision radio pills */
+[data-testid="stRadio"] label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+  font-size: 13px !important;
+  letter-spacing: 0.03em;
+}
+
+/* Dataframe + JSON */
+[data-testid="stDataFrame"] * {
+  font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+}
+
+/* Expander */
+[data-testid="stExpander"] {
+  border: 1px solid var(--line) !important;
+  border-radius: 2px !important;
+  background: var(--ground-panel) !important;
+}
+
+/* Progress bar */
+[data-testid="stProgress"] > div > div > div {
+  background-color: var(--accent) !important;
+}
+
+/* Rec-status badge - a real styled element, not markdown color
+   syntax (which doesn't parse inside a raw HTML string). */
+.rec-badge {
+  font-family: "Spectral", Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(28px, 4vw, 40px);
+  text-align: center;
+  letter-spacing: -0.01em;
+  margin: 0.2em 0;
+}
+.rec-headline { text-align: center; color: var(--ink-soft); }
+.rec-status { text-align: center; color: var(--ink-faint); font-size: 13px; }
+
+.risk-tag {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+</style>
+"""
+
+st.markdown(APP_CSS, unsafe_allow_html=True)
+
+
 PAGES = ["Decision", "Investigation", "Evidence", "Review"]
+
+REC_COLOR_VAR = {
+    "ADVANCE": "--risk-low",
+    "ADVANCE_WITH_CONDITIONS": "--accent",
+    "HOLD": "--risk-medium",
+    "DO_NOT_ADVANCE": "--risk-critical",
+}
 
 REC_HEADLINE = {
     "ADVANCE": (
-        "green",
         "The evidence base supports moving forward - no unresolved "
-        "material issues were identified.",
+        "material issues were identified."
     ),
     "ADVANCE_WITH_CONDITIONS": (
-        "blue",
         "The opportunity can advance, but the conditions below must "
-        "be resolved first.",
+        "be resolved first."
     ),
     "HOLD": (
-        "orange",
         "Material issues remain that should be resolved before "
-        "committing additional development capital.",
+        "committing additional development capital."
     ),
     "DO_NOT_ADVANCE": (
-        "red",
         "A disqualifying finding means this opportunity should not "
-        "advance in its current form.",
+        "advance in its current form."
     ),
 }
 
@@ -226,9 +378,8 @@ if "show_how_it_works" not in st.session_state:
 st.markdown("## Renewable Development Intelligence")
 st.markdown("#### Should we continue investing in this opportunity?")
 
-badge_color, headline = REC_HEADLINE.get(
-    rec["recommendation"], ("gray", "")
-)
+color_var = REC_COLOR_VAR.get(rec["recommendation"], "--ink")
+headline = REC_HEADLINE.get(rec["recommendation"], "")
 
 card = st.container(border=True)
 
@@ -236,34 +387,24 @@ with card:
 
     top = st.columns([2, 1, 1, 1])
     top[0].markdown("**WESTERN OKLAHOMA WIND**")
-    top[1].caption(f"250 MW")
+    top[1].caption("250 MW")
     top[2].caption("Western Oklahoma")
     top[3].caption(f"Target COD {data.draft.get('target_cod')}")
 
-    st.markdown(
-        f"<h1 style='text-align:center;margin:0.2em 0;'>"
-        f":{badge_color}[{rec['recommendation'].replace('_', ' ')}]"
-        f"</h1>",
-        unsafe_allow_html=True,
+    status_line = (
+        "Draft — awaiting human review"
+        if not rec.get("human_approved")
+        else f"✅ Approved by "
+        f"{rec.get('reviewed_by', 'a named reviewer')}"
     )
 
     st.markdown(
-        f"<p style='text-align:center;'>{headline}</p>",
+        f"<div class='rec-badge' style='color:var({color_var})'>"
+        f"{rec['recommendation'].replace('_', ' ')}</div>"
+        f"<p class='rec-headline'>{headline}</p>"
+        f"<p class='rec-status'>{status_line}</p>",
         unsafe_allow_html=True,
     )
-
-    if not rec.get("human_approved"):
-        st.caption(
-            "<p style='text-align:center;'>Draft — awaiting "
-            "human review</p>",
-            unsafe_allow_html=True,
-        )
-    else:
-        st.caption(
-            "<p style='text-align:center;'>✅ Approved by "
-            f"{rec.get('reviewed_by', 'a named reviewer')}</p>",
-            unsafe_allow_html=True,
-        )
 
     btn_cols = st.columns([3, 1, 1, 3])
 
@@ -578,10 +719,21 @@ if selected_page == "Decision":
 
         reasons.sort(key=lambda r: severity_rank.get(r[0], 9))
 
+        severity_color_var = {
+            "CRITICAL": "--risk-critical",
+            "HIGH": "--risk-high",
+            "UNKNOWN": "--accent-warm",
+            "MEDIUM": "--risk-medium",
+            "LOW": "--risk-low",
+        }
+
         for severity, label, description in reasons[:5]:
+            color_var = severity_color_var.get(severity, "--ink")
             st.markdown(
-                f"**{severity}** &nbsp; {label} — "
-                f"{description}"
+                f"<span class='risk-tag' "
+                f"style='color:var({color_var})'>{severity}"
+                f"</span> &nbsp; **{label}** — {description}",
+                unsafe_allow_html=True,
             )
 
     else:
@@ -641,9 +793,12 @@ if selected_page == "Decision":
             cols[1].markdown(f"`{gate['status']}`")
             cols[2].markdown(f"conf: {gate['confidence']}")
             cols[3].markdown(
-                f":red[{high_or_critical} high]"
+                "<span class='risk-tag' "
+                "style='color:var(--risk-high)'>"
+                f"{high_or_critical} high</span>"
                 if high_or_critical
-                else f"{risk_count} risk(s)"
+                else f"{risk_count} risk(s)",
+                unsafe_allow_html=True,
             )
 
         st.markdown(
